@@ -620,9 +620,9 @@ int main(int argc, char** argv)
 			float ray_oy = 0.0f;
 			float ray_oz = 0.0f;
 
-			float ray_dx = ((float(i + 0.5f) / float(x_res)) * 2.0f - 1.0f) * fov_adjust * aspect;
+			float ray_dx = ((float(i + 0.5f) / x_resf) * 2.0f - 1.0f) * fov_adjust * aspect;
 
-			float ray_dy = (1.0f - (float(j + 0.5f) / float(y_res)) * 2.0f) * fov_adjust;
+			float ray_dy = (1.0f - (float(j + 0.5f) / y_resf) * 2.0f) * fov_adjust;
 
 			float ray_dz = -1.0f;
 
@@ -660,6 +660,60 @@ int main(int argc, char** argv)
 			pixel[G] = fmax(0.0f, fmin(255.0f, color_g * 255.0f));
 			pixel[B] = fmax(0.0f, fmin(255.0f, color_b * 255.0f));
 		}
+	}
+
+	int supersample = 0;
+
+	if (supersample)
+	{
+		unsigned char* supersampled = (unsigned char*)malloc
+		(
+			x_res / supersample *
+			y_res / supersample *
+
+			3 * sizeof(unsigned char)
+		);
+
+		if (!supersample)
+		{
+			nuke("Could not allocate a frame buffer for supersampling (malloc).");
+		}
+
+		x_res = x_res / supersample;
+		y_res = y_res / supersample;
+
+		for (int j = 0; j < y_res; j++)
+		for (int i = 0; i < x_res; i++)
+		{
+			unsigned char* pixel = supersampled + (j * x_res + i) * 3;
+
+			int ssi = i * supersample;
+			int ssj = j * supersample;
+
+			float sum_r = 0.0f;
+			float sum_g = 0.0f;
+			float sum_b = 0.0f;
+
+			for (int v = 0; v < supersample; v++)
+			for (int u = 0; u < supersample; u++)
+			{
+				unsigned char* sspixel = frame_buffer + ((ssj + v) * (x_res * supersample) + (ssi + u)) * 3;
+
+				sum_r += sspixel[R];
+				sum_g += sspixel[G];
+				sum_b += sspixel[B];
+			}
+
+			sum_r /= supersample * supersample;
+			sum_g /= supersample * supersample;
+			sum_b /= supersample * supersample;
+
+			pixel[R] = fmin(255, fmax(0, int(sum_r)));
+			pixel[G] = fmin(255, fmax(0, int(sum_g)));
+			pixel[B] = fmin(255, fmax(0, int(sum_b)));
+		}
+
+		frame_buffer = supersampled;
 	}
 
 	if (!stbi_write_png("orb.png", x_res, y_res, 3, frame_buffer, x_res * 3))
