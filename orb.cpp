@@ -17,6 +17,10 @@ const int B = 2;
 
 #include "stb_image_write.h"
 
+#define STB_PERLIN_IMPLEMENTATION
+
+#include "stb_perlin.h"
+
 struct orb
 {
 	float x;
@@ -198,7 +202,58 @@ void trace
 
 	if (min_dist == std::numeric_limits<float>::max())
 	{
-		// Missed everything.
+		// Missed everything, use background shader.
+
+		int mode = 1;
+
+		if (mode == -1)
+		{
+			return;
+		}
+		else if (mode == 0)
+		{
+			// Checkerboard.
+
+			float domain_u = 0.1f;
+			float domain_v = 0.1f;
+
+			bool check_u = fmod(ray_dx + domain_u * 100.0f, domain_u * 2.0f) >= domain_u;
+			bool check_v = fmod(ray_dy + domain_v * 100.0f, domain_v * 2.0f) >= domain_v;
+
+			if (check_u ^ check_v)
+			{
+				out_r = 0.0f;
+				out_g = 0.0f;
+				out_b = 0.0f;
+			}
+			else
+			{
+				out_r = 0.8f;
+				out_g = 0.8f;
+				out_b = 0.8f;
+			}
+		}
+		else if (mode == 1)
+		{
+			// Sky.
+
+			float frequency = 8.0f;
+
+			float noise = stb_perlin_fbm_noise3
+			(
+				ray_dx * frequency, 
+				ray_dy * frequency, 
+				ray_dz * frequency, 
+
+				2.0f, 0.5f, 6
+			);
+
+			out_r = (noise + 1.0f) / 2.0f * 0.3f;
+
+			// out_r = 186.0f / 255.0f * 0.64f + (noise + 1.0f) / 2.0f * 0.3f;
+			// out_g = 214.0f / 255.0f * 0.64f + (noise + 1.0f) / 2.0f * 0.3f;
+			// out_b = 254.0f / 255.0f * 0.64f + (noise + 1.0f) / 2.0f * 0.3f;
+		}
 
 		return;
 	}
