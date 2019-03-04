@@ -1,0 +1,1 @@
+clang++ orb.cpp -o orb -std=c++11 -Ofast && ./orb
