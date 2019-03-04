@@ -339,7 +339,7 @@ void trace
 
 	// Calculate lighting.
 
-	float shadow_rays = 16.0f;
+	float shadow_rays = 1.0f;
 
 	for (int k = 0; k < int(shadow_rays); k++)
 	{
@@ -419,9 +419,11 @@ void trace
 
 				if (shadow_dist < dr)
 				{
-					shadow -= 0.2f;
+					shadow -= 0.4f;
 				}
 			}
+
+			// Diffuse.
 
 			float l_pow =
 			(
@@ -436,11 +438,48 @@ void trace
 			out_g += fmax(0.0f, hit_orb_g * lamp.g * l_pow * shadow);
 			out_b += fmax(0.0f, hit_orb_b * lamp.b * l_pow * shadow);
 
-			l_pow = powf(l_pow * dr * dr, 128.0f) / dr / dr * lamp.radius / shadow_rays;
+			// Specular.
 
-			out_r += fmax(0.0f, lamp.r * l_pow * shadow);
-			out_g += fmax(0.0f, lamp.g * l_pow * shadow);
-			out_b += fmax(0.0f, lamp.b * l_pow * shadow);
+			float specular_constant = 0.5f;
+
+			float view_hit_x = ray_ox - hit_x;
+			float view_hit_y = ray_oy - hit_y;
+			float view_hit_z = ray_oz - hit_z;
+
+			float view_hit_length = sqrtf
+			(
+				view_hit_x * view_hit_x +
+				view_hit_y * view_hit_y +
+				view_hit_z * view_hit_z
+			);
+
+			view_hit_x /= view_hit_length;
+			view_hit_y /= view_hit_length;
+			view_hit_z /= view_hit_length;
+
+			float dot_n_i =
+			(
+				-dtl_x * norm_x +
+				-dtl_y * norm_y +
+				-dtl_z * norm_z
+			);
+
+			float specular_x = -dtl_x - 2.0f * dot_n_i * norm_x;
+			float specular_y = -dtl_y - 2.0f * dot_n_i * norm_y;
+			float specular_z = -dtl_z - 2.0f * dot_n_i * norm_z;
+
+			float dot_view_specular =
+			(
+				view_hit_x * specular_x +
+				view_hit_y * specular_y +
+				view_hit_z * specular_z
+			);
+
+			float specular_coefficient = powf(fmax(dot_view_specular, 0.0f), 2048.0f);
+
+			out_r += fmax(0.0f, lamp.r * specular_coefficient * shadow);
+			out_g += fmax(0.0f, lamp.g * specular_coefficient * shadow);
+			out_b += fmax(0.0f, lamp.b * specular_coefficient * shadow);
 		}
 	}
 
@@ -518,6 +557,11 @@ void trace
 	reflect_b /= reflection_rays;
 
 	float reflectivity = 0.8f;
+
+	if (hit_orb_radius < 200.0f)
+	{
+		reflectivity = 0.6f;
+	}
 
 	out_r = out_r * (1.0f - reflectivity) + reflect_r * reflectivity;
 	out_g = out_g * (1.0f - reflectivity) + reflect_g * reflectivity;
