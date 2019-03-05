@@ -717,6 +717,8 @@ int main(int argc, char** argv)
 		pixel[B] = 0.0f * 255.0f;
 	}
 
+	float gamma = 1.0f / 2.2f;
+
 	for (int j = 0; j < y_res; j++)
 	{
 		std::cout << "Row " << j + 1 << "/" << y_res << "\r" << std::flush;
@@ -771,6 +773,12 @@ int main(int argc, char** argv)
 			pixel[R] = fmax(0.0f, fmin(255.0f, color_r * 255.0f));
 			pixel[G] = fmax(0.0f, fmin(255.0f, color_g * 255.0f));
 			pixel[B] = fmax(0.0f, fmin(255.0f, color_b * 255.0f));
+
+			// // Gamma correction (slightly broken).
+			//
+			// pixel[R] = fmax(0.0f, fmin(255.0f, powf(color_r, gamma) * 255.0f));
+			// pixel[G] = fmax(0.0f, fmin(255.0f, powf(color_g, gamma) * 255.0f));
+			// pixel[B] = fmax(0.0f, fmin(255.0f, powf(color_b, gamma) * 255.0f));
 		}
 	}
 
