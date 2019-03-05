@@ -32,6 +32,10 @@ struct orb
 	float b;
 
 	float radius;
+
+	float material1;
+	float material2;
+	float material3;
 };
 
 float rand11()
@@ -72,7 +76,11 @@ float cast
 	float& hit_orb_g,
 	float& hit_orb_b,
 
-	float& hit_orb_radius
+	float& hit_orb_radius,
+
+	float& hit_orb_material1,
+	float& hit_orb_material2,
+	float& hit_orb_material3
 )
 {
 	float min_dist = std::numeric_limits<float>::max();
@@ -122,7 +130,20 @@ float cast
 			continue;
 		}
 
-		float i_d = std::min(i_t0, i_t1);
+		float i_d = std::numeric_limits<float>::max();
+
+		if (i_t0 < 0.0f)
+		{
+			i_d = i_t1;
+		}
+		else if (i_t1 < 0.0f)
+		{
+			i_d = i_t0;
+		}
+		else
+		{
+			i_d = fmin(i_t0, i_t1);
+		}
 
 		if (i_d < min_dist)
 		{
@@ -137,6 +158,10 @@ float cast
 			hit_orb_b = orb1.b;
 
 			hit_orb_radius = orb1.radius;
+
+			hit_orb_material1 = orb1.material1;
+			hit_orb_material2 = orb1.material2;
+			hit_orb_material3 = orb1.material3;
 		}
 	}
 
@@ -172,6 +197,10 @@ void trace
 
 	float hit_orb_radius;
 
+	float hit_orb_material1;
+	float hit_orb_material2;
+	float hit_orb_material3;
+
 	float min_dist = cast
 	(
 		ray_ox,
@@ -190,7 +219,11 @@ void trace
 		hit_orb_g,
 		hit_orb_b,
 
-		hit_orb_radius
+		hit_orb_radius,
+
+		hit_orb_material1,
+		hit_orb_material2,
+		hit_orb_material3
 	);
 
 	out_r = 0.0f;
@@ -203,11 +236,7 @@ void trace
 
 		int mode = 1;
 
-		if (mode == -1)
-		{
-			return;
-		}
-		else if (mode == 0)
+		if (mode == 0)
 		{
 			// Checkerboard.
 
@@ -391,6 +420,10 @@ void trace
 				shadow_ray_dummy,
 				shadow_ray_dummy,
 
+				shadow_ray_dummy,
+
+				shadow_ray_dummy,
+				shadow_ray_dummy,
 				shadow_ray_dummy
 			);
 
@@ -465,95 +498,195 @@ void trace
 	out_g /= shadow_rays;
 	out_b /= shadow_rays;
 
-	// Add reflections.
+	// Prevent infinite recursion.
 
-	if (depth > 2)
+	if (depth > 5)
 	{
 		return;
 	}
 
-	float eps = 1e-3f;
+	// Add reflections.
 
-	float reflect_ox = hit_x + norm_x * eps;
-	float reflect_oy = hit_y + norm_y * eps;
-	float reflect_oz = hit_z + norm_z * eps;
-
-	float incident_dot_norm =
-	(
-		ray_dx * norm_x +
-		ray_dy * norm_y +
-		ray_dz * norm_z
-	);
-
-	float reflect_dx = ray_dx - (2.0f * incident_dot_norm * norm_x);
-	float reflect_dy = ray_dy - (2.0f * incident_dot_norm * norm_y);
-	float reflect_dz = ray_dz - (2.0f * incident_dot_norm * norm_z);
-
-	float reflect_r = 0.0f;
-	float reflect_g = 0.0f;
-	float reflect_b = 0.0f;
-
-	float reflection_rays = 1.0f;
-
-	for (int i = 0; i < reflection_rays; i++)
+	if (hit_orb_material1 > 0.0f)
 	{
-		float gloss = 0.0f;
+		float eps = 1e-3f;
 
-		float additive_reflect_r;
-		float additive_reflect_g;
-		float additive_reflect_b;
+		float reflect_ox = hit_x + norm_x * eps;
+		float reflect_oy = hit_y + norm_y * eps;
+		float reflect_oz = hit_z + norm_z * eps;
 
-		trace
+		float incident_dot_norm =
 		(
-			reflect_ox,
-			reflect_oy,
-			reflect_oz,
-
-			reflect_dx + rand11() * gloss,
-			reflect_dy + rand11() * gloss,
-			reflect_dz + rand11() * gloss,
-
-			additive_reflect_r,
-			additive_reflect_g,
-			additive_reflect_b,
-
-			depth + 1
+			ray_dx * norm_x +
+			ray_dy * norm_y +
+			ray_dz * norm_z
 		);
 
-		reflect_r += additive_reflect_r;
-		reflect_g += additive_reflect_g;
-		reflect_b += additive_reflect_b;
+		float reflect_dx = ray_dx - (2.0f * incident_dot_norm * norm_x);
+		float reflect_dy = ray_dy - (2.0f * incident_dot_norm * norm_y);
+		float reflect_dz = ray_dz - (2.0f * incident_dot_norm * norm_z);
+
+		float reflect_r = 0.0f;
+		float reflect_g = 0.0f;
+		float reflect_b = 0.0f;
+
+		if (false)
+		{
+			// Glossy reflections.
+
+			float reflection_rays = 1.0f;
+
+			for (int i = 0; i < reflection_rays; i++)
+			{
+				float gloss = 0.0f;
+
+				float additive_reflect_r;
+				float additive_reflect_g;
+				float additive_reflect_b;
+
+				trace
+				(
+					reflect_ox,
+					reflect_oy,
+					reflect_oz,
+
+					reflect_dx + rand11() * gloss,
+					reflect_dy + rand11() * gloss,
+					reflect_dz + rand11() * gloss,
+
+					additive_reflect_r,
+					additive_reflect_g,
+					additive_reflect_b,
+
+					depth + 1
+				);
+
+				reflect_r += additive_reflect_r;
+				reflect_g += additive_reflect_g;
+				reflect_b += additive_reflect_b;
+			}
+
+			reflect_r /= reflection_rays;
+			reflect_g /= reflection_rays;
+			reflect_b /= reflection_rays;
+		}
+		else
+		{
+			// Standard reflections.
+
+			trace
+			(
+				reflect_ox,
+				reflect_oy,
+				reflect_oz,
+
+				reflect_dx,
+				reflect_dy,
+				reflect_dz,
+
+				reflect_r,
+				reflect_g,
+				reflect_b,
+
+				depth + 1
+			);
+		}
+
+		out_r = out_r * (1.0f - hit_orb_material1) + reflect_r * hit_orb_material1;
+		out_g = out_g * (1.0f - hit_orb_material1) + reflect_g * hit_orb_material1;
+		out_b = out_b * (1.0f - hit_orb_material1) + reflect_b * hit_orb_material1;
 	}
 
-	reflect_r /= reflection_rays;
-	reflect_g /= reflection_rays;
-	reflect_b /= reflection_rays;
+	// Add refractions.
 
-	float reflectivity = 0.8f;
-
-	if (hit_orb_radius < 200.0f)
+	if (hit_orb_material2 > 0.0f)
 	{
-		reflectivity = 0.6f;
-	}
+		float ref_n_x = norm_x;
+		float ref_n_y = norm_y;
+		float ref_n_z = norm_z;
 
-	out_r = out_r * (1.0f - reflectivity) + reflect_r * reflectivity;
-	out_g = out_g * (1.0f - reflectivity) + reflect_g * reflectivity;
-	out_b = out_b * (1.0f - reflectivity) + reflect_b * reflectivity;
+		float eta_i = 1.0f;
+
+		float i_dot_n =
+		(
+			ray_dx * norm_x +
+			ray_dy * norm_y +
+			ray_dz * norm_z
+		);
+
+		float eta_t = hit_orb_material3;
+
+		if (i_dot_n < 0.0f)
+		{
+			i_dot_n = -i_dot_n;
+		}
+		else
+		{
+			eta_i = hit_orb_material3;
+
+			ref_n_x = -norm_x;
+			ref_n_y = -norm_y;
+			ref_n_z = -norm_z;
+
+			eta_t = 1.0f;
+		}
+
+		float eta = eta_i / eta_t;
+
+		float refract_r = 0.0f;
+		float refract_g = 0.0f;
+		float refract_b = 0.0f;
+
+		float k = sqrtf(1.0f - (eta * eta) * (1.0f - i_dot_n * i_dot_n));
+
+		if (k * k >= 0.0f)
+		{
+			float eps = 1e-3f;
+
+			float refract_ox = hit_x + ref_n_x * -eps;
+			float refract_oy = hit_y + ref_n_y * -eps;
+			float refract_oz = hit_z + ref_n_z * -eps;
+
+			float refract_dx = (ray_dx + i_dot_n * ref_n_x) * eta - ref_n_x * k;
+			float refract_dy = (ray_dy + i_dot_n * ref_n_y) * eta - ref_n_y * k;
+			float refract_dz = (ray_dz + i_dot_n * ref_n_z) * eta - ref_n_z * k;
+
+			trace
+			(
+				refract_ox,
+				refract_oy,
+				refract_oz,
+
+				refract_dx,
+				refract_dy,
+				refract_dz,
+
+				refract_r,
+				refract_g,
+				refract_b,
+
+				depth + 1
+			);
+		}	
+
+		out_r = out_r * (1.0f - hit_orb_material2) + refract_r * hit_orb_material2;
+		out_g = out_g * (1.0f - hit_orb_material2) + refract_g * hit_orb_material2;
+		out_b = out_b * (1.0f - hit_orb_material2) + refract_b * hit_orb_material2;
+	}
 }
 
 int main(int argc, char** argv)
 {
-	orbs1.push_back({0.0f, -3024.0f, 0.0f, 0.0f, 0.0f, 0.0f, 3000.0f});
+	orbs1.push_back({0.0f, -3024.0f, 0.0f, 0.0f, 0.0f, 0.0f, 3000.0f, 0.8f, 0.0f, 0.0f});
 
-	orbs1.push_back({0.0f, -8.0f, -56.0f, 0.0f, 1.0f, 0.0f, 16.0f});
-
-	orbs1.push_back({0.0f - 32.0f, -8.0f, -56.0f, 1.0f, 0.0f, 0.0f, 16.0f});
-	orbs1.push_back({0.0f + 32.0f, -8.0f, -56.0f, 0.0f, 0.0f, 1.0f, 16.0f});
+	orbs1.push_back({0.0f - 32.0f * 1.0f, -8.0f, -56.0f, 1.0f, 0.0f, 0.0f, 16.0f, 0.6f, 0.0f, 0.0f});
+	orbs1.push_back({0.0f + 32.0f * 0.0f, -8.0f, -56.0f, 0.0f, 1.0f, 0.0f, 16.0f, 0.0f, 0.9f, 1.3f});
+	orbs1.push_back({0.0f + 32.0f * 1.0f, -8.0f, -56.0f, 0.0f, 0.0f, 1.0f, 16.0f, 0.6f, 0.0f, 0.0f});
 
 	orbs2.push_back({25.0f, 50.0f, 0.0f, 1e+4f * 1.4f, 1e+4f * 1.4f, 1e+4f * 1.4f, 50.0f});
 
-	int x_res = 128 * 16;
-	int y_res = 128 * 16;
+	int x_res = 128 * 32;
+	int y_res = 128 * 32;
 
 	float x_resf = x_res;
 	float y_resf = y_res;
