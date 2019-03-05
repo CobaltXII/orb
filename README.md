@@ -2,6 +2,10 @@
 
 ![Alt text](https://github.com/CobaltXII/orb/blob/master/img/orb_4.png?raw=true)
 
+## Summary
+
+Orb started out as a weekend project, but then got a little bigger. It currently supports diffuse lighting, specular lighting, recursion, reflection, refraction, procedural environments, procedural texturing, supersampling, and materials. More features will be added soon!
+
 ## Compiling
 
 I use this script
