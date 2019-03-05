@@ -543,8 +543,6 @@ void trace
 
 int main(int argc, char** argv)
 {
-	srand(2048);
-
 	orbs1.push_back({0.0f, -3024.0f, 0.0f, 0.0f, 0.0f, 0.0f, 3000.0f});
 
 	orbs1.push_back({0.0f, -8.0f, -56.0f, 0.0f, 1.0f, 0.0f, 16.0f});
@@ -554,8 +552,8 @@ int main(int argc, char** argv)
 
 	orbs2.push_back({25.0f, 50.0f, 0.0f, 1e+4f * 1.4f, 1e+4f * 1.4f, 1e+4f * 1.4f, 50.0f});
 
-	int x_res = 4096 * 8;
-	int y_res = 2304 * 8;
+	int x_res = 128 * 8;
+	int y_res = 128 * 8;
 
 	float x_resf = x_res;
 	float y_resf = y_res;
