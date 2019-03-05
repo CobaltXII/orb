@@ -34,8 +34,6 @@ struct orb
 	float radius;
 };
 
-typedef orb lamp;
-
 float rand11()
 {
 	return float(rand()) / float(RAND_MAX) * 2.0f - 1.0f;
@@ -53,9 +51,8 @@ void nuke(std::string note)
 	exit(EXIT_FAILURE);
 }
 
-std::vector<orb> orbs;
-
-std::vector<lamp> lamps;
+std::vector<orb> orbs1;
+std::vector<orb> orbs2;
 
 float cast
 (
@@ -80,13 +77,13 @@ float cast
 {
 	float min_dist = std::numeric_limits<float>::max();
 
-	for (int i = 0; i < orbs.size(); i++)
+	for (int i = 0; i < orbs1.size(); i++)
 	{
-		orb orb = orbs[i];
+		orb orb1 = orbs1[i];
 
-		float i_lx = orb.x - ray_ox;
-		float i_ly = orb.y - ray_oy;
-		float i_lz = orb.z - ray_oz;
+		float i_lx = orb1.x - ray_ox;
+		float i_ly = orb1.y - ray_oy;
+		float i_lz = orb1.z - ray_oz;
 
 		float i_adj2 =
 		(
@@ -106,8 +103,8 @@ float cast
 
 		float i_r2 =
 		(
-			orb.radius *
-			orb.radius
+			orb1.radius *
+			orb1.radius
 		);
 
 		if (i_d2 > i_r2)
@@ -131,15 +128,15 @@ float cast
 		{
 			min_dist = i_d;
 
-			hit_orb_x = orb.x;
-			hit_orb_y = orb.y;
-			hit_orb_z = orb.z;
+			hit_orb_x = orb1.x;
+			hit_orb_y = orb1.y;
+			hit_orb_z = orb1.z;
 
-			hit_orb_r = orb.r;
-			hit_orb_g = orb.g;
-			hit_orb_b = orb.b;
+			hit_orb_r = orb1.r;
+			hit_orb_g = orb1.g;
+			hit_orb_b = orb1.b;
 
-			hit_orb_radius = orb.radius;
+			hit_orb_radius = orb1.radius;
 		}
 	}
 
@@ -343,11 +340,11 @@ void trace
 
 	for (int k = 0; k < int(shadow_rays); k++)
 	{
-		for (int i = 0; i < lamps.size(); i++)
+		for (int i = 0; i < orbs2.size(); i++)
 		{
-			lamp lamp = lamps[i];
+			orb orb2 = orbs2[i];
 
-			// Perturb lamp for smooth shadows.
+			// Perturb orb for smooth shadows.
 
 			float r1 = rand11();
 			float r2 = rand11();
@@ -355,19 +352,11 @@ void trace
 
 			float deviation = shadow_rays - 1.0f;
 
-			lamp.x += r1 * deviation;
-			lamp.y += r2 * deviation;
-			lamp.z += r3 * deviation;
+			// Direction to orb1.
 
-			// Direction to lamp.
-
-			float dtl_x = lamp.x - hit_x;
-			float dtl_y = lamp.y - hit_y;
-			float dtl_z = lamp.z - hit_z;
-
-			lamp.x -= r1 * deviation;
-			lamp.y -= r2 * deviation;
-			lamp.z -= r3 * deviation;
+			float dtl_x = (orb2.x + r1 * deviation) - hit_x;
+			float dtl_y = (orb2.y + r2 * deviation) - hit_y;
+			float dtl_z = (orb2.z + r3 * deviation) - hit_z;
 
 			float dr = sqrtf
 			(
@@ -380,47 +369,36 @@ void trace
 			dtl_y /= dr;
 			dtl_z /= dr;
 
-			// Send shadow rays.
+			// Send shadow ray.
+
+			float shadow_ray_dummy;
+
+			float shadow_dist = cast
+			(
+				hit_x + 1e-3f * dtl_x,
+				hit_y + 1e-3f * dtl_y,
+				hit_z + 1e-3f * dtl_z,
+
+				dtl_x,
+				dtl_y,
+				dtl_z,
+
+				shadow_ray_dummy,
+				shadow_ray_dummy,
+				shadow_ray_dummy,
+
+				shadow_ray_dummy,
+				shadow_ray_dummy,
+				shadow_ray_dummy,
+
+				shadow_ray_dummy
+			);
 
 			float shadow = 1.0f;
 
-			for (int j = 0; j < orbs.size(); j++)
+			if (shadow_dist < dr)
 			{
-				orb orb = orbs[j];
-
-				// Prevent shadow acne.
-
-				float eps = 1e-3f;
-
-				// Send shadow ray.
-
-				float shadow_ray_dummy;
-
-				float shadow_dist = cast
-				(
-					hit_x + eps * dtl_x,
-					hit_y + eps * dtl_y,
-					hit_z + eps * dtl_z,
-
-					dtl_x,
-					dtl_y,
-					dtl_z,
-
-					shadow_ray_dummy,
-					shadow_ray_dummy,
-					shadow_ray_dummy,
-
-					shadow_ray_dummy,
-					shadow_ray_dummy,
-					shadow_ray_dummy,
-
-					shadow_ray_dummy
-				);
-
-				if (shadow_dist < dr)
-				{
-					shadow -= 0.4f;
-				}
+				shadow = 0.0f;
 			}
 
 			// Diffuse.
@@ -434,9 +412,9 @@ void trace
 
 			l_pow /= dr * dr;
 
-			out_r += fmax(0.0f, hit_orb_r * lamp.r * l_pow * shadow);
-			out_g += fmax(0.0f, hit_orb_g * lamp.g * l_pow * shadow);
-			out_b += fmax(0.0f, hit_orb_b * lamp.b * l_pow * shadow);
+			out_r += fmax(0.0f, hit_orb_r * orb2.r * l_pow * shadow);
+			out_g += fmax(0.0f, hit_orb_g * orb2.g * l_pow * shadow);
+			out_b += fmax(0.0f, hit_orb_b * orb2.b * l_pow * shadow);
 
 			// Specular.
 
@@ -477,9 +455,9 @@ void trace
 
 			float specular_coefficient = powf(fmax(dot_view_specular, 0.0f), 2048.0f);
 
-			out_r += fmax(0.0f, lamp.r * specular_coefficient * shadow);
-			out_g += fmax(0.0f, lamp.g * specular_coefficient * shadow);
-			out_b += fmax(0.0f, lamp.b * specular_coefficient * shadow);
+			out_r += fmax(0.0f, orb2.r * specular_coefficient * shadow);
+			out_g += fmax(0.0f, orb2.g * specular_coefficient * shadow);
+			out_b += fmax(0.0f, orb2.b * specular_coefficient * shadow);
 		}
 	}
 
@@ -489,7 +467,7 @@ void trace
 
 	// Add reflections.
 
-	if (depth > 5)
+	if (depth > 2)
 	{
 		return;
 	}
@@ -516,11 +494,6 @@ void trace
 	float reflect_b = 0.0f;
 
 	float reflection_rays = 1.0f;
-
-	if (depth != 0)
-	{
-		reflection_rays = 1.0f;
-	}
 
 	for (int i = 0; i < reflection_rays; i++)
 	{
@@ -572,10 +545,17 @@ int main(int argc, char** argv)
 {
 	srand(2048);
 
-	#include "scene/three.cpp"
+	orbs1.push_back({0.0f, -3024.0f, 0.0f, 0.0f, 0.0f, 0.0f, 3000.0f});
 
-	int x_res = 128 * 8;
-	int y_res = 128 * 8;
+	orbs1.push_back({0.0f, -8.0f, -56.0f, 0.0f, 1.0f, 0.0f, 16.0f});
+
+	orbs1.push_back({0.0f - 32.0f, -8.0f, -56.0f, 1.0f, 0.0f, 0.0f, 16.0f});
+	orbs1.push_back({0.0f + 32.0f, -8.0f, -56.0f, 0.0f, 0.0f, 1.0f, 16.0f});
+
+	orbs2.push_back({25.0f, 50.0f, 0.0f, 1e+4f * 1.4f, 1e+4f * 1.4f, 1e+4f * 1.4f, 50.0f});
+
+	int x_res = 4096 * 8;
+	int y_res = 2304 * 8;
 
 	float x_resf = x_res;
 	float y_resf = y_res;
@@ -620,11 +600,12 @@ int main(int argc, char** argv)
 			float ray_oy = 0.0f;
 			float ray_oz = 0.0f;
 
-			float ray_dx = ((float(i + 0.5f) / x_resf) * 2.0f - 1.0f) * fov_adjust * aspect;
-
-			float ray_dy = (1.0f - (float(j + 0.5f) / y_resf) * 2.0f) * fov_adjust;
+			float ray_dx = (0.0f + (float(i + 0.5f) / x_resf) * 2.0f - 1.0f) * fov_adjust;
+			float ray_dy = (1.0f - (float(j + 0.5f) / y_resf) * 2.0f + 0.0f) * fov_adjust;
 
 			float ray_dz = -1.0f;
+
+			ray_dx *= aspect;
 
 			float ray_length = sqrtf
 			(
