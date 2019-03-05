@@ -552,8 +552,8 @@ int main(int argc, char** argv)
 
 	orbs2.push_back({25.0f, 50.0f, 0.0f, 1e+4f * 1.4f, 1e+4f * 1.4f, 1e+4f * 1.4f, 50.0f});
 
-	int x_res = 128 * 8;
-	int y_res = 128 * 8;
+	int x_res = 128 * 16;
+	int y_res = 128 * 16;
 
 	float x_resf = x_res;
 	float y_resf = y_res;
@@ -641,7 +641,7 @@ int main(int argc, char** argv)
 		}
 	}
 
-	int supersample = 0;
+	int supersample = 2;
 
 	if (supersample)
 	{
