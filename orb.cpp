@@ -680,13 +680,13 @@ int main(int argc, char** argv)
 	orbs1.push_back({0.0f, -3024.0f, 0.0f, 0.0f, 0.0f, 0.0f, 3000.0f, 0.8f, 0.0f, 0.0f});
 
 	orbs1.push_back({0.0f - 32.0f * 1.0f, -8.0f, -56.0f, 1.0f, 0.0f, 0.0f, 16.0f, 0.6f, 0.0f, 0.0f});
-	orbs1.push_back({0.0f + 32.0f * 0.0f, -8.0f, -56.0f, 0.0f, 1.0f, 0.0f, 16.0f, 0.0f, 0.9f, 1.3f});
+	orbs1.push_back({0.0f + 32.0f * 0.0f, -8.0f, -56.0f, 0.0f, 1.0f, 0.0f, 16.0f, 0.6f, 0.0f, 0.0f});
 	orbs1.push_back({0.0f + 32.0f * 1.0f, -8.0f, -56.0f, 0.0f, 0.0f, 1.0f, 16.0f, 0.6f, 0.0f, 0.0f});
 
 	orbs2.push_back({25.0f, 50.0f, 0.0f, 1e+4f * 1.4f, 1e+4f * 1.4f, 1e+4f * 1.4f, 50.0f});
 
-	int x_res = 128 * 32;
-	int y_res = 128 * 32;
+	int x_res = 128 * 16;
+	int y_res = 128 * 16;
 
 	float x_resf = x_res;
 	float y_resf = y_res;
@@ -776,7 +776,7 @@ int main(int argc, char** argv)
 
 	int supersample = 2;
 
-	if (supersample)
+	if (supersample > 1)
 	{
 		unsigned char* supersampled = (unsigned char*)malloc
 		(
