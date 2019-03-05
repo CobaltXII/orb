@@ -1,6 +1,6 @@
 # Orb
 
-![Alt text](https://github.com/CobaltXII/orb/blob/master/img/orb_4.png?raw=true)
+![Alt text](https://github.com/CobaltXII/orb/blob/master/img/orb_3.png?raw=true)
 
 ## Summary
 
