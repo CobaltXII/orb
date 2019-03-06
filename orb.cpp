@@ -142,7 +142,8 @@ float cast
 
 	float& hit_orb_material1,
 	float& hit_orb_material2,
-	float& hit_orb_material3
+	float& hit_orb_material3,
+	float& hit_orb_material4
 )
 {
 	float min_dist = std::numeric_limits<float>::max();
@@ -224,6 +225,7 @@ float cast
 			hit_orb_material1 = orb1.material1;
 			hit_orb_material2 = orb1.material2;
 			hit_orb_material3 = orb1.material3;
+			hit_orb_material4 = orb1.material4;
 		}
 	}
 
@@ -262,6 +264,7 @@ void trace
 	float hit_orb_material1;
 	float hit_orb_material2;
 	float hit_orb_material3;
+	float hit_orb_material4;
 
 	float min_dist = cast
 	(
@@ -285,7 +288,8 @@ void trace
 
 		hit_orb_material1,
 		hit_orb_material2,
-		hit_orb_material3
+		hit_orb_material3,
+		hit_orb_material4
 	);
 
 	out_r = 0.0f;
@@ -302,11 +306,28 @@ void trace
 		{
 			// Checkerboard.
 
-			float domain_u = 0.1f;
-			float domain_v = 0.1f;
+			float ray_intersection_u;
+			float ray_intersection_v;
 
-			bool check_u = fmod(ray_dx + domain_u * 100.0f, domain_u * 2.0f) >= domain_u;
-			bool check_v = fmod(ray_dy + domain_v * 100.0f, domain_v * 2.0f) >= domain_v;
+			sphere_uv
+			(
+				ray_dx,
+				ray_dy,
+				ray_dz,
+
+				0.0f, 0.0f, 0.0f,
+
+				1.0f,
+
+				ray_intersection_u,
+				ray_intersection_v
+			);
+
+			float domain_u = 0.025f;
+			float domain_v = 0.025f;
+
+			bool check_u = fmod(ray_intersection_u + domain_u * 100.0f, domain_u * 2.0f) >= domain_u;
+			bool check_v = fmod(ray_intersection_v + domain_v * 100.0f, domain_v * 2.0f) >= domain_v;
 
 			if (check_u ^ check_v)
 			{
