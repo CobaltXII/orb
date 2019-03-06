@@ -34,14 +34,15 @@ struct orb
 	float material1;
 	float material2;
 	float material3;
+	float material4;
 };
 
-float rand11()
+inline float rand11()
 {
 	return float(rand()) / float(RAND_MAX) * 2.0f - 1.0f;
 }
 
-float rand01()
+inline float rand01()
 {
 	return float(rand()) / float(RAND_MAX);
 }
@@ -52,6 +53,44 @@ void nuke(std::string note)
 
 	exit(EXIT_FAILURE);
 }
+
+struct sampler
+{
+	int x_res;
+	int y_res;
+
+	unsigned char* data;
+
+	sampler(std::string path)
+	{
+		data = stbi_load(path.c_str(), &x_res, &y_res, NULL, 3);
+
+		if (!data)
+		{
+			nuke("Could not load image (stbi_load).");
+		}
+	}
+
+	inline void sample
+	(
+		float u, 
+		float v,
+
+		float& out_color_r,
+		float& out_color_g,
+		float& out_color_b
+	)
+	{
+		int x = fmin(fmax(0, u * x_res), x_res - 1);
+		int y = fmin(fmax(0, v * y_res), y_res - 1);
+
+		unsigned char* pixel = data + (y * x_res + x) * 3;
+
+		out_color_r = float(pixel[R]) / 255.0f;
+		out_color_g = float(pixel[G]) / 255.0f;
+		out_color_b = float(pixel[B]) / 255.0f;
+	}
+};
 
 std::vector<orb> orbs1;
 std::vector<orb> orbs2;
