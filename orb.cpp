@@ -507,6 +507,7 @@ void trace
 
 				shadow_ray_dummy,
 				shadow_ray_dummy,
+				shadow_ray_dummy,
 				shadow_ray_dummy
 			);
 
@@ -569,7 +570,7 @@ void trace
 				view_hit_z * specular_z
 			);
 
-			float specular_coefficient = powf(fmax(dot_view_specular, 0.0f), 2048.0f);
+			float specular_coefficient = powf(fmax(dot_view_specular, 0.0f), hit_orb_material4);
 
 			out_r += fmax(0.0f, orb2.r * specular_coefficient * shadow);
 			out_g += fmax(0.0f, orb2.g * specular_coefficient * shadow);
@@ -760,11 +761,11 @@ void trace
 
 int main(int argc, char** argv)
 {
-	orbs1.push_back({0.0f, -3024.0f, 0.0f, 0.0f, 0.0f, 0.0f, 3000.0f, 0.8f, 0.0f, 0.0f});
+	orbs1.push_back({0.0f, -3024.0f, 0.0f, 0.0f, 0.0f, 0.0f, 3000.0f, 0.800f, 0.0f, 0.0f, INFINITY});
 
-	orbs1.push_back({0.0f - 32.0f * 1.0f, -8.0f, -56.0f, 0.972f, 0.960f, 0.915f, 16.0f, 0.700f, 0.0f, 0.0f});
-	orbs1.push_back({0.0f + 32.0f * 0.0f, -8.0f, -56.0f, 1.000f, 0.766f, 0.336f, 16.0f, 0.500f, 0.0f, 0.0f});
-	orbs1.push_back({0.0f + 32.0f * 1.0f, -8.0f, -56.0f, 0.955f, 0.637f, 0.538f, 16.0f, 0.600f, 0.0f, 0.0f});
+	orbs1.push_back({0.0f - 32.0f * 1.0f, -8.0f, -56.0f, 1.000f, 0.000f, 0.000f, 16.0f, 0.600f, 0.0f, 0.0f, 2048.0f});
+	orbs1.push_back({0.0f + 32.0f * 0.0f, -8.0f, -56.0f, 0.000f, 1.000f, 0.000f, 16.0f, 0.600f, 0.0f, 0.0f, 2048.0f});
+	orbs1.push_back({0.0f + 32.0f * 1.0f, -8.0f, -56.0f, 0.000f, 0.000f, 1.000f, 16.0f, 0.600f, 0.0f, 0.0f, 2048.0f});
 
 	orbs2.push_back({25.0f, 50.0f, 0.0f, 1e+4f, 1e+4f, 1e+4f, 50.0f});
 
