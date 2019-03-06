@@ -358,8 +358,6 @@ void trace
 			);
 
 			out_r = (noise + 1.0f) / 2.0f * 0.3f;
-			out_g = (noise + 1.0f) / 2.0f * 0.3f;
-			out_b = (noise + 1.0f) / 2.0f * 0.3f;
 
 			// out_r = 186.0f / 255.0f * 0.64f + (noise + 1.0f) / 2.0f * 0.3f;
 			// out_g = 214.0f / 255.0f * 0.64f + (noise + 1.0f) / 2.0f * 0.3f;
@@ -391,9 +389,34 @@ void trace
 	norm_y /= norm_length;
 	norm_z /= norm_length;
 
-	// Middle sphere should be textured.
+	// Small spheres should be procedurally textured.
 
-	
+	if (hit_orb_radius < 200.0f)
+	{
+		float frequency = 0.48f;
+
+		float noise = stb_perlin_ridge_noise3
+		(
+			hit_x * frequency,
+			hit_y * frequency,
+			hit_z * frequency,
+
+			2.0f, 0.5f, 1.0f, 6
+		);
+
+		if (hit_orb_r > 0.5f)
+		{
+			hit_orb_r = (noise + 1.0f) / 2.0f;
+		}
+		else if (hit_orb_g > 0.5f)
+		{
+			hit_orb_g = (noise + 1.0f) / 2.0f;
+		}
+		else if (hit_orb_b > 0.5f)
+		{
+			hit_orb_b = (noise + 1.0f) / 2.0f;
+		}
+	}
 
 	// Check for large spheres, which should be checkered.
 
