@@ -13,11 +13,9 @@ const int R = 0;
 const int G = 1;
 const int B = 2;
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image.h"
 
 #include "stb_image_write.h"
-
-#define STB_PERLIN_IMPLEMENTATION
 
 #include "stb_perlin.h"
 
@@ -275,6 +273,8 @@ void trace
 			);
 
 			out_r = (noise + 1.0f) / 2.0f * 0.3f;
+			out_g = (noise + 1.0f) / 2.0f * 0.3f;
+			out_b = (noise + 1.0f) / 2.0f * 0.3f;
 
 			// out_r = 186.0f / 255.0f * 0.64f + (noise + 1.0f) / 2.0f * 0.3f;
 			// out_g = 214.0f / 255.0f * 0.64f + (noise + 1.0f) / 2.0f * 0.3f;
@@ -308,32 +308,7 @@ void trace
 
 	// Middle sphere should be textured.
 
-	if (hit_orb_r > 0.5f || hit_orb_g > 0.5f || hit_orb_b > 0.5f)
-	{
-		float frequency = 0.48f;
-
-		float noise = stb_perlin_ridge_noise3
-		(
-			hit_x * frequency,
-			hit_y * frequency,
-			hit_z * frequency,
-
-			2.0f, 0.5f, 1.0f, 6
-		);
-
-		if (hit_orb_r > 0.5f)
-		{
-			hit_orb_r = (noise + 1.0f) / 2.0f;
-		}
-		else if (hit_orb_g > 0.5f)
-		{
-			hit_orb_g = (noise + 1.0f) / 2.0f;
-		}
-		else if (hit_orb_b > 0.5f)
-		{
-			hit_orb_b = (noise + 1.0f) / 2.0f;
-		}
-	}
+	
 
 	// Check for large spheres, which should be checkered.
 
@@ -679,11 +654,11 @@ int main(int argc, char** argv)
 {
 	orbs1.push_back({0.0f, -3024.0f, 0.0f, 0.0f, 0.0f, 0.0f, 3000.0f, 0.8f, 0.0f, 0.0f});
 
-	orbs1.push_back({0.0f - 32.0f * 1.0f, -8.0f, -56.0f, 1.0f, 0.0f, 0.0f, 16.0f, 0.6f, 0.0f, 0.0f});
-	orbs1.push_back({0.0f + 32.0f * 0.0f, -8.0f, -56.0f, 0.0f, 1.0f, 0.0f, 16.0f, 0.6f, 0.0f, 0.0f});
-	orbs1.push_back({0.0f + 32.0f * 1.0f, -8.0f, -56.0f, 0.0f, 0.0f, 1.0f, 16.0f, 0.6f, 0.0f, 0.0f});
+	orbs1.push_back({0.0f - 32.0f * 1.0f, -8.0f, -56.0f, 0.972f, 0.960f, 0.915f, 16.0f, 0.700f, 0.0f, 0.0f});
+	orbs1.push_back({0.0f + 32.0f * 0.0f, -8.0f, -56.0f, 1.000f, 0.766f, 0.336f, 16.0f, 0.500f, 0.0f, 0.0f});
+	orbs1.push_back({0.0f + 32.0f * 1.0f, -8.0f, -56.0f, 0.955f, 0.637f, 0.538f, 16.0f, 0.600f, 0.0f, 0.0f});
 
-	orbs2.push_back({25.0f, 50.0f, 0.0f, 1e+4f * 1.4f, 1e+4f * 1.4f, 1e+4f * 1.4f, 50.0f});
+	orbs2.push_back({25.0f, 50.0f, 0.0f, 1e+4f, 1e+4f, 1e+4f, 50.0f});
 
 	int x_res = 128 * 16;
 	int y_res = 128 * 16;
