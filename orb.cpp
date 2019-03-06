@@ -767,7 +767,7 @@ int main(int argc, char** argv)
 	orbs1.push_back({0.0f + 32.0f * 0.0f, -8.0f, -56.0f, 0.000f, 1.000f, 0.000f, 16.0f, 0.600f, 0.0f, 0.0f, 2048.0f});
 	orbs1.push_back({0.0f + 32.0f * 1.0f, -8.0f, -56.0f, 0.000f, 0.000f, 1.000f, 16.0f, 0.600f, 0.0f, 0.0f, 2048.0f});
 
-	orbs2.push_back({25.0f, 50.0f, 0.0f, 1e+4f, 1e+4f, 1e+4f, 50.0f});
+	orbs2.push_back({25.0f, 50.0f, 0.0f, 1e+4f * 1.4f, 1e+4f * 1.4f, 1e+4f * 1.4f, 50.0f});
 
 	int x_res = 128 * 16;
 	int y_res = 128 * 16;
