@@ -19,23 +19,151 @@ const int B = 2;
 
 #include "stb_perlin.h"
 
-struct orb
+template <typename T>
+
+inline void set_ptr(T* __ptr, T __value)
 {
-	float x;
-	float y;
-	float z;
+	if (__ptr)
+	{
+		*__ptr = __value;
+	}
+}
+
+enum shape_type
+{
+	st_sphere, st_plane
+};
+
+struct shape
+{
+	float material1;
+	float material2;
+	float material3;
+	float material4;
 
 	float r;
 	float g;
 	float b;
 
+	shape_type primitive;
+};
+
+struct sphere: shape
+{
+	float x;
+	float y;
+	float z;
+
 	float radius;
 
-	float material1;
-	float material2;
-	float material3;
-	float material4;
+	sphere
+	(
+		float x,
+		float y,
+		float z,
+
+		float r,
+		float g,
+		float b,
+
+		float radius,
+
+		float material1 = 0.0f,
+		float material2 = 0.0f,
+		float material3 = 0.0f,
+		float material4 = 0.0f
+	)
+	{
+		this->primitive = shape_type::st_sphere;
+
+		this->x = x;
+		this->y = y;
+		this->z = z;
+
+		this->r = r;
+		this->g = g;
+		this->b = b;
+
+		this->radius = radius;
+
+		this->material1 = material1;
+		this->material2 = material2;
+		this->material3 = material3;
+		this->material4 = material4;
+	}
 };
+
+inline sphere TO_SPHERE(shape* __victim)
+{
+	return *((sphere*)__victim);
+}
+
+struct plane: shape
+{
+	float x;
+	float y;
+	float z;
+
+	float norm_x;
+	float norm_y;
+	float norm_z;
+
+	plane
+	(
+		float x,
+		float y,
+		float z,
+
+		float norm_x,
+		float norm_y,
+		float norm_z,
+
+		float r,
+		float g,
+		float b,
+
+		float material1 = 0.0f,
+		float material2 = 0.0f,
+		float material3 = 0.0f,
+		float material4 = 0.0f
+	)
+	{
+		this->primitive = shape_type::st_plane;
+
+		this->x = x;
+		this->y = y;
+		this->z = z;
+
+		this->norm_x = norm_x;
+		this->norm_y = norm_y;
+		this->norm_z = norm_z;
+
+		float norm_length = sqrtf
+		(
+			this->norm_x * this->norm_x +
+			this->norm_y * this->norm_y +
+			this->norm_z * this->norm_z
+		);
+
+		this->norm_x /= norm_length;
+		this->norm_y /= norm_length;
+		this->norm_z /= norm_length;
+
+		this->r = r;
+		this->g = g;
+		this->b = b;
+
+		this->material1 = material1;
+		this->material2 = material2;
+		this->material3 = material3;
+		this->material4 = material4;
+	}
+};
+
+inline plane TO_PLANE(shape* __victim)
+{
+	return *((plane*)__victim);
+}
 
 inline float rand11()
 {
@@ -92,8 +220,7 @@ struct sampler
 	}
 };
 
-std::vector<orb> orbs1;
-std::vector<orb> orbs2;
+std::vector<shape*> shapes;
 
 inline void sphere_uv
 (
@@ -120,6 +247,104 @@ inline void sphere_uv
 	out_v = acosf(hit_vec_y / sphere_radius) / M_PI;
 }
 
+inline void plane_uv
+(
+	float intersection_x,
+	float intersection_y,
+	float intersection_z,
+
+	float plane_origin_x,
+	float plane_origin_y,
+	float plane_origin_z,
+
+	float plane_normal_x,
+	float plane_normal_y,
+	float plane_normal_z,
+
+	float& out_u,
+	float& out_v
+)
+{
+	float x_axis_x = plane_normal_y * 1.0f - 0.0f * plane_normal_z;
+	float x_axis_y = plane_normal_x * 1.0f - 0.0f * plane_normal_z;
+	float x_axis_z = plane_normal_x * 0.0f - 0.0f * plane_normal_y;
+
+	float x_axis_length =
+	(
+		x_axis_x * x_axis_x +
+		x_axis_y * x_axis_y +
+		x_axis_z * x_axis_z
+	);
+
+	if (x_axis_length <= 0.0f)
+	{
+		x_axis_x = plane_normal_y * 0.0f - 0.0f * plane_normal_y;
+		x_axis_y = plane_normal_z * 0.0f - 0.0f * plane_normal_z;
+		x_axis_z = plane_normal_x * 1.0f - 1.0f * plane_normal_x;
+	}
+
+	float y_axis_x = plane_normal_y * x_axis_z - x_axis_y * plane_normal_z;
+	float y_axis_y = plane_normal_x * x_axis_z - x_axis_x * plane_normal_z;
+	float y_axis_z = plane_normal_x * x_axis_y - x_axis_x * plane_normal_y;
+
+	float hit_vec_x = intersection_x - plane_origin_x;
+	float hit_vec_y = intersection_y - plane_origin_y;
+	float hit_vec_z = intersection_z - plane_origin_z;
+
+	out_u =
+	(
+		hit_vec_x * x_axis_x +
+		hit_vec_y * x_axis_y +
+		hit_vec_z * x_axis_z
+	);
+
+	out_v =
+	(
+		hit_vec_x * y_axis_x +
+		hit_vec_y * y_axis_y +
+		hit_vec_z * y_axis_z
+	);
+}
+
+struct light
+{
+	float x;
+	float y;
+	float z;
+
+	float r;
+	float g;
+	float b;
+
+	float radius;
+
+	light
+	(
+		float x,
+		float y,
+		float z,
+
+		float r,
+		float g,
+		float b,
+
+		float radius
+	)
+	{
+		this->x = x;
+		this->y = y;
+		this->z = z;
+
+		this->r = r;
+		this->g = g;
+		this->b = b;
+
+		this->radius = radius;
+	}
+};
+
+std::vector<light> lights;
+
 float cast
 (
 	float ray_ox,
@@ -130,102 +355,147 @@ float cast
 	float ray_dy,
 	float ray_dz,
 
-	float& hit_orb_x,
-	float& hit_orb_y,
-	float& hit_orb_z,
+	float* hit_shape_material1 = NULL,
+	float* hit_shape_material2 = NULL,
+	float* hit_shape_material3 = NULL,
+	float* hit_shape_material4 = NULL,
 
-	float& hit_orb_r,
-	float& hit_orb_g,
-	float& hit_orb_b,
+	float* hit_shape_r = NULL,
+	float* hit_shape_g = NULL,
+	float* hit_shape_b = NULL,
 
-	float& hit_orb_radius,
-
-	float& hit_orb_material1,
-	float& hit_orb_material2,
-	float& hit_orb_material3,
-	float& hit_orb_material4
+	shape** hit_shape = NULL
 )
 {
 	float min_dist = std::numeric_limits<float>::max();
 
-	for (int i = 0; i < orbs1.size(); i++)
+	for (int i = 0; i < shapes.size(); i++)
 	{
-		orb orb1 = orbs1[i];
+		shape* shape1 = shapes[i];
 
-		float i_lx = orb1.x - ray_ox;
-		float i_ly = orb1.y - ray_oy;
-		float i_lz = orb1.z - ray_oz;
+		// Use the appropriate intersector.
 
-		float i_adj2 =
-		(
-			i_lx * ray_dx +
-			i_ly * ray_dy +
-			i_lz * ray_dz
-		);
-
-		float i_d2 =
-		(
-			i_lx * i_lx +
-			i_ly * i_ly +
-			i_lz * i_lz
-		);
-
-		i_d2 -= i_adj2 * i_adj2;
-
-		float i_r2 =
-		(
-			orb1.radius *
-			orb1.radius
-		);
-
-		if (i_d2 > i_r2)
+		if (shape1->primitive == shape_type::st_sphere)
 		{
-			continue;
+			sphere sphere1 = *(sphere*)shape1;
+
+			float i_lx = sphere1.x - ray_ox;
+			float i_ly = sphere1.y - ray_oy;
+			float i_lz = sphere1.z - ray_oz;
+
+			float i_adj2 =
+			(
+				i_lx * ray_dx +
+				i_ly * ray_dy +
+				i_lz * ray_dz
+			);
+
+			float i_d2 =
+			(
+				i_lx * i_lx +
+				i_ly * i_ly +
+				i_lz * i_lz
+			);
+
+			i_d2 -= i_adj2 * i_adj2;
+
+			float i_r2 =
+			(
+				sphere1.radius *
+				sphere1.radius
+			);
+
+			if (i_d2 > i_r2)
+			{
+				continue;
+			}
+
+			float i_thc = sqrtf(i_r2 - i_d2);
+
+			float i_t0 = i_adj2 - i_thc;
+			float i_t1 = i_adj2 + i_thc;
+
+			if (i_t0 < 0.0f && i_t1 < 0.0f)
+			{
+				continue;
+			}
+
+			float i_d = std::numeric_limits<float>::max();
+
+			if (i_t0 < 0.0f)
+			{
+				i_d = i_t1;
+			}
+			else if (i_t1 < 0.0f)
+			{
+				i_d = i_t0;
+			}
+			else
+			{
+				i_d = fmin(i_t0, i_t1);
+			}
+
+			if (i_d < min_dist)
+			{
+				min_dist = i_d;
+
+				set_ptr(hit_shape_material1, sphere1.material1);
+				set_ptr(hit_shape_material2, sphere1.material2);
+				set_ptr(hit_shape_material3, sphere1.material3);
+				set_ptr(hit_shape_material4, sphere1.material4);
+
+				set_ptr(hit_shape_r, sphere1.r);
+				set_ptr(hit_shape_g, sphere1.g);
+				set_ptr(hit_shape_b, sphere1.b);
+
+				set_ptr(hit_shape, shape1);
+			}
 		}
-
-		float i_thc = sqrtf(i_r2 - i_d2);
-
-		float i_t0 = i_adj2 - i_thc;
-		float i_t1 = i_adj2 + i_thc;
-
-		if (i_t0 < 0.0f && i_t1 < 0.0f)
+		else if (shape1->primitive == shape_type::st_plane)
 		{
-			continue;
-		}
+			plane plane1 = *(plane*)shape1;
 
-		float i_d = std::numeric_limits<float>::max();
+			float denom =
+			(
+				-plane1.norm_x * ray_dx +
+				-plane1.norm_y * ray_dy +
+				-plane1.norm_z * ray_dz
+			);
 
-		if (i_t0 < 0.0f)
-		{
-			i_d = i_t1;
-		}
-		else if (i_t1 < 0.0f)
-		{
-			i_d = i_t0;
-		}
-		else
-		{
-			i_d = fmin(i_t0, i_t1);
-		}
+			if (denom > 1e-6f)
+			{
+				float v_x = plane1.x - ray_ox;
+				float v_y = plane1.y - ray_oy;
+				float v_z = plane1.z - ray_oz;
 
-		if (i_d < min_dist)
-		{
-			min_dist = i_d;
+				float distance =
+				(
+					v_x * -plane1.norm_x +
+					v_y * -plane1.norm_y +
+					v_z * -plane1.norm_z
+				);
 
-			hit_orb_x = orb1.x;
-			hit_orb_y = orb1.y;
-			hit_orb_z = orb1.z;
+				if (distance >= 0.0f)
+				{
+					float i_d = distance / denom;
+					
+					if (i_d < min_dist)
+					{
+						min_dist = i_d;
 
-			hit_orb_r = orb1.r;
-			hit_orb_g = orb1.g;
-			hit_orb_b = orb1.b;
+						set_ptr(hit_shape_material1, plane1.material1);
+						set_ptr(hit_shape_material2, plane1.material2);
+						set_ptr(hit_shape_material3, plane1.material3);
+						set_ptr(hit_shape_material4, plane1.material4);
 
-			hit_orb_radius = orb1.radius;
+						set_ptr(hit_shape_r, plane1.r);
+						set_ptr(hit_shape_g, plane1.g);
+						set_ptr(hit_shape_b, plane1.b);
 
-			hit_orb_material1 = orb1.material1;
-			hit_orb_material2 = orb1.material2;
-			hit_orb_material3 = orb1.material3;
-			hit_orb_material4 = orb1.material4;
+						set_ptr(hit_shape, shape1);
+					}
+				}
+			}
 		}
 	}
 
@@ -251,20 +521,16 @@ void trace
 {
 	// Cast primary ray.
 
-	float hit_orb_x;
-	float hit_orb_y;
-	float hit_orb_z;
+	float hit_shape_material1;
+	float hit_shape_material2;
+	float hit_shape_material3;
+	float hit_shape_material4;
 
-	float hit_orb_r;
-	float hit_orb_g;
-	float hit_orb_b;
+	float hit_shape_r;
+	float hit_shape_g;
+	float hit_shape_b;
 
-	float hit_orb_radius;
-
-	float hit_orb_material1;
-	float hit_orb_material2;
-	float hit_orb_material3;
-	float hit_orb_material4;
+	shape* hit_shape;
 
 	float min_dist = cast
 	(
@@ -276,20 +542,16 @@ void trace
 		ray_dy,
 		ray_dz,
 
-		hit_orb_x,
-		hit_orb_y,
-		hit_orb_z,
+		&hit_shape_material1,
+		&hit_shape_material2,
+		&hit_shape_material3,
+		&hit_shape_material4,
 
-		hit_orb_r,
-		hit_orb_g,
-		hit_orb_b,
+		&hit_shape_r,
+		&hit_shape_g,
+		&hit_shape_b,
 
-		hit_orb_radius,
-
-		hit_orb_material1,
-		hit_orb_material2,
-		hit_orb_material3,
-		hit_orb_material4
+		&hit_shape
 	);
 
 	out_r = 0.0f;
@@ -344,7 +606,7 @@ void trace
 		}
 		else if (mode == 1)
 		{
-			// Sky.
+			// Blood sky.
 
 			float frequency = 8.0f;
 
@@ -358,10 +620,6 @@ void trace
 			);
 
 			out_r = (noise + 1.0f) / 2.0f * 0.3f;
-
-			// out_r = 186.0f / 255.0f * 0.64f + (noise + 1.0f) / 2.0f * 0.3f;
-			// out_g = 214.0f / 255.0f * 0.64f + (noise + 1.0f) / 2.0f * 0.3f;
-			// out_b = 254.0f / 255.0f * 0.64f + (noise + 1.0f) / 2.0f * 0.3f;
 		}
 
 		return;
@@ -374,9 +632,24 @@ void trace
 	float hit_y = ray_oy + ray_dy * min_dist;
 	float hit_z = ray_oz + ray_dz * min_dist;
 
-	float norm_x = hit_x - hit_orb_x;
-	float norm_y = hit_y - hit_orb_y;
-	float norm_z = hit_z - hit_orb_z;
+	float norm_x;
+	float norm_y;
+	float norm_z;
+
+	// Compute surface normal.
+
+	if (hit_shape->primitive == shape_type::st_sphere)
+	{
+		norm_x = hit_x - TO_SPHERE(hit_shape).x;
+		norm_y = hit_y - TO_SPHERE(hit_shape).y;
+		norm_z = hit_z - TO_SPHERE(hit_shape).z;
+	}
+	else if (hit_shape->primitive == shape_type::st_plane)
+	{
+		norm_x = TO_PLANE(hit_shape).norm_x;
+		norm_y = TO_PLANE(hit_shape).norm_y;
+		norm_z = TO_PLANE(hit_shape).norm_z;
+	}
 
 	float norm_length = sqrtf
 	(
@@ -391,7 +664,7 @@ void trace
 
 	// Small spheres should be procedurally textured.
 
-	if (hit_orb_radius < 200.0f)
+	if (hit_shape->primitive == shape_type::st_sphere && TO_SPHERE(hit_shape).radius < 200.0f)
 	{
 		float frequency = 0.48f;
 
@@ -404,183 +677,174 @@ void trace
 			2.0f, 0.5f, 1.0f, 6
 		);
 
-		if (hit_orb_r > 0.5f)
+		if (hit_shape_r > 0.5f)
 		{
-			hit_orb_r = (noise + 1.0f) / 2.0f;
+			hit_shape_r = (noise + 1.0f) / 2.0f;
 		}
-		else if (hit_orb_g > 0.5f)
+		else if (hit_shape_g > 0.5f)
 		{
-			hit_orb_g = (noise + 1.0f) / 2.0f;
+			hit_shape_g = (noise + 1.0f) / 2.0f;
 		}
-		else if (hit_orb_b > 0.5f)
+		else if (hit_shape_b > 0.5f)
 		{
-			hit_orb_b = (noise + 1.0f) / 2.0f;
+			hit_shape_b = (noise + 1.0f) / 2.0f;
 		}
 	}
 
-	// Check for large spheres, which should be checkered.
+	// Check for planes, which should be checkered.
 
-	if (hit_orb_radius > 200.0f)
+	if (hit_shape->primitive == shape_type::st_plane)
 	{
-		float domain_x = 10.0f;
-		float domain_y = 10.0f;
-		float domain_z = 10.0f;
+		float plane_u;
+		float plane_v;
 
-		float expand = 512.0f;
+		plane_uv
+		(
+			hit_x,
+			hit_y,
+			hit_z,
 
-		int check_x = fmod(hit_x + domain_x * expand, domain_x * 2.0f) >= domain_x;
-		int check_y = fmod(hit_y + domain_y * expand, domain_y * 2.0f) >= domain_y;
-		int check_z = fmod(hit_z + domain_z * expand, domain_z * 2.0f) >= domain_z;
+			TO_PLANE(hit_shape).x,
+			TO_PLANE(hit_shape).y,
+			TO_PLANE(hit_shape).z,
 
-		if (check_x ^ check_y ^ check_z)
+			norm_x,
+			norm_y,
+			norm_z,
+
+			plane_u,
+			plane_v
+		);
+
+		float domain_u = 10.0f;
+		float domain_v = 10.0f;
+
+		float expand = 16384.0f;
+
+		int check_u = fmod(plane_u + domain_u * expand, domain_u * 2.0f) >= domain_u;
+		int check_v = fmod(plane_v + domain_v * expand, domain_v * 2.0f) >= domain_v;
+
+		if (check_u ^ check_v)
 		{
-			hit_orb_r = 0.0f * 2.0f;
-			hit_orb_g = 0.0f * 2.0f;
-			hit_orb_b = 0.0f * 2.0f;
+			hit_shape_r = 0.0f * 2.0f;
+			hit_shape_g = 0.0f * 2.0f;
+			hit_shape_b = 0.0f * 2.0f;
 		}
 		else
 		{
-			hit_orb_r = 0.85f * 2.0f;
-			hit_orb_g = 0.85f * 2.0f;
-			hit_orb_b = 0.85f * 2.0f;
+			hit_shape_r = 0.85f * 2.0f;
+			hit_shape_g = 0.85f * 2.0f;
+			hit_shape_b = 0.85f * 2.0f;
 		}
 	}
 
 	// Calculate lighting.
 
-	float shadow_rays = 1.0f;
-
-	for (int k = 0; k < int(shadow_rays); k++)
+	for (int i = 0; i < lights.size(); i++)
 	{
-		for (int i = 0; i < orbs2.size(); i++)
+		light light1 = lights[i];
+
+		// Direction to shape.
+
+		float dtl_x = light1.x - hit_x;
+		float dtl_y = light1.y - hit_y;
+		float dtl_z = light1.z - hit_z;
+
+		float dr = sqrtf
+		(
+			dtl_x * dtl_x +
+			dtl_y * dtl_y +
+			dtl_z * dtl_z
+		);
+
+		dtl_x /= dr;
+		dtl_y /= dr;
+		dtl_z /= dr;
+
+		// Send shadow ray.
+
+		float shadow_dist = cast
+		(
+			hit_x + 1e-1f * dtl_x,
+			hit_y + 1e-1f * dtl_y,
+			hit_z + 1e-1f * dtl_z,
+
+			dtl_x,
+			dtl_y,
+			dtl_z
+		);
+
+		if (shadow_dist < dr)
 		{
-			orb orb2 = orbs2[i];
+			#ifdef VERY_HARD_SHADOWS
 
-			// Perturb orb for smooth shadows.
+			return;
 
-			float r1 = rand11();
-			float r2 = rand11();
-			float r3 = rand11();
+			#else
 
-			float deviation = shadow_rays - 1.0f;
+			continue;
 
-			// Direction to orb1.
-
-			float dtl_x = (orb2.x + r1 * deviation) - hit_x;
-			float dtl_y = (orb2.y + r2 * deviation) - hit_y;
-			float dtl_z = (orb2.z + r3 * deviation) - hit_z;
-
-			float dr = sqrtf
-			(
-				dtl_x * dtl_x +
-				dtl_y * dtl_y +
-				dtl_z * dtl_z
-			);
-
-			dtl_x /= dr;
-			dtl_y /= dr;
-			dtl_z /= dr;
-
-			// Send shadow ray.
-
-			float shadow_ray_dummy;
-
-			float shadow_dist = cast
-			(
-				hit_x + 1e-3f * dtl_x,
-				hit_y + 1e-3f * dtl_y,
-				hit_z + 1e-3f * dtl_z,
-
-				dtl_x,
-				dtl_y,
-				dtl_z,
-
-				shadow_ray_dummy,
-				shadow_ray_dummy,
-				shadow_ray_dummy,
-
-				shadow_ray_dummy,
-				shadow_ray_dummy,
-				shadow_ray_dummy,
-
-				shadow_ray_dummy,
-
-				shadow_ray_dummy,
-				shadow_ray_dummy,
-				shadow_ray_dummy,
-				shadow_ray_dummy
-			);
-
-			float shadow = 1.0f;
-
-			if (shadow_dist < dr)
-			{
-				shadow = 0.0f;
-			}
-
-			// Diffuse.
-
-			float l_pow =
-			(
-				norm_x * dtl_x +
-				norm_y * dtl_y +
-				norm_z * dtl_z
-			);
-
-			l_pow /= dr * dr;
-
-			out_r += fmax(0.0f, hit_orb_r * orb2.r * l_pow * shadow);
-			out_g += fmax(0.0f, hit_orb_g * orb2.g * l_pow * shadow);
-			out_b += fmax(0.0f, hit_orb_b * orb2.b * l_pow * shadow);
-
-			// Specular.
-
-			float specular_constant = 0.5f;
-
-			float view_hit_x = ray_ox - hit_x;
-			float view_hit_y = ray_oy - hit_y;
-			float view_hit_z = ray_oz - hit_z;
-
-			float view_hit_length = sqrtf
-			(
-				view_hit_x * view_hit_x +
-				view_hit_y * view_hit_y +
-				view_hit_z * view_hit_z
-			);
-
-			view_hit_x /= view_hit_length;
-			view_hit_y /= view_hit_length;
-			view_hit_z /= view_hit_length;
-
-			float dot_n_i =
-			(
-				-dtl_x * norm_x +
-				-dtl_y * norm_y +
-				-dtl_z * norm_z
-			);
-
-			float specular_x = -dtl_x - 2.0f * dot_n_i * norm_x;
-			float specular_y = -dtl_y - 2.0f * dot_n_i * norm_y;
-			float specular_z = -dtl_z - 2.0f * dot_n_i * norm_z;
-
-			float dot_view_specular =
-			(
-				view_hit_x * specular_x +
-				view_hit_y * specular_y +
-				view_hit_z * specular_z
-			);
-
-			float specular_coefficient = powf(fmax(dot_view_specular, 0.0f), hit_orb_material4);
-
-			out_r += fmax(0.0f, orb2.r * specular_coefficient * shadow);
-			out_g += fmax(0.0f, orb2.g * specular_coefficient * shadow);
-			out_b += fmax(0.0f, orb2.b * specular_coefficient * shadow);
+			#endif
 		}
-	}
 
-	out_r /= shadow_rays;
-	out_g /= shadow_rays;
-	out_b /= shadow_rays;
+		// Diffuse.
+
+		float l_pow =
+		(
+			norm_x * dtl_x +
+			norm_y * dtl_y +
+			norm_z * dtl_z
+		);
+
+		l_pow /= dr * dr;
+
+		out_r += fmax(0.0f, hit_shape_r * light1.r * l_pow);
+		out_g += fmax(0.0f, hit_shape_g * light1.g * l_pow);
+		out_b += fmax(0.0f, hit_shape_b * light1.b * l_pow);
+
+		// Specular.
+
+		float specular_constant = 0.5f;
+
+		float view_hit_x = ray_ox - hit_x;
+		float view_hit_y = ray_oy - hit_y;
+		float view_hit_z = ray_oz - hit_z;
+
+		float view_hit_length = sqrtf
+		(
+			view_hit_x * view_hit_x +
+			view_hit_y * view_hit_y +
+			view_hit_z * view_hit_z
+		);
+
+		view_hit_x /= view_hit_length;
+		view_hit_y /= view_hit_length;
+		view_hit_z /= view_hit_length;
+
+		float dot_n_i =
+		(
+			-dtl_x * norm_x +
+			-dtl_y * norm_y +
+			-dtl_z * norm_z
+		);
+
+		float specular_x = -dtl_x - 2.0f * dot_n_i * norm_x;
+		float specular_y = -dtl_y - 2.0f * dot_n_i * norm_y;
+		float specular_z = -dtl_z - 2.0f * dot_n_i * norm_z;
+
+		float dot_view_specular =
+		(
+			view_hit_x * specular_x +
+			view_hit_y * specular_y +
+			view_hit_z * specular_z
+		);
+
+		float specular_coefficient = powf(fmax(dot_view_specular, 0.0f), hit_shape_material4);
+
+		out_r += fmax(0.0f, light1.r * specular_coefficient);
+		out_g += fmax(0.0f, light1.g * specular_coefficient);
+		out_b += fmax(0.0f, light1.b * specular_coefficient);
+	}
 
 	// Prevent infinite recursion.
 
@@ -591,7 +855,7 @@ void trace
 
 	// Add reflections.
 
-	if (hit_orb_material1 > 0.0f)
+	if (hit_shape_material1 > 0.0f)
 	{
 		float eps = 1e-3f;
 
@@ -676,14 +940,14 @@ void trace
 			);
 		}
 
-		out_r = out_r * (1.0f - hit_orb_material1) + reflect_r * hit_orb_material1;
-		out_g = out_g * (1.0f - hit_orb_material1) + reflect_g * hit_orb_material1;
-		out_b = out_b * (1.0f - hit_orb_material1) + reflect_b * hit_orb_material1;
+		out_r = out_r * (1.0f - hit_shape_material1) + reflect_r * hit_shape_material1;
+		out_g = out_g * (1.0f - hit_shape_material1) + reflect_g * hit_shape_material1;
+		out_b = out_b * (1.0f - hit_shape_material1) + reflect_b * hit_shape_material1;
 	}
 
 	// Add refractions.
 
-	if (hit_orb_material2 > 0.0f)
+	if (hit_shape_material2 > 0.0f)
 	{
 		float ref_n_x = norm_x;
 		float ref_n_y = norm_y;
@@ -698,7 +962,7 @@ void trace
 			ray_dz * norm_z
 		);
 
-		float eta_t = hit_orb_material3;
+		float eta_t = hit_shape_material3;
 
 		if (i_dot_n < 0.0f)
 		{
@@ -706,7 +970,7 @@ void trace
 		}
 		else
 		{
-			eta_i = hit_orb_material3;
+			eta_i = hit_shape_material3;
 
 			ref_n_x = -norm_x;
 			ref_n_y = -norm_y;
@@ -753,21 +1017,21 @@ void trace
 			);
 		}	
 
-		out_r = out_r * (1.0f - hit_orb_material2) + refract_r * hit_orb_material2;
-		out_g = out_g * (1.0f - hit_orb_material2) + refract_g * hit_orb_material2;
-		out_b = out_b * (1.0f - hit_orb_material2) + refract_b * hit_orb_material2;
+		out_r = out_r * (1.0f - hit_shape_material2) + refract_r * hit_shape_material2;
+		out_g = out_g * (1.0f - hit_shape_material2) + refract_g * hit_shape_material2;
+		out_b = out_b * (1.0f - hit_shape_material2) + refract_b * hit_shape_material2;
 	}
 }
 
 int main(int argc, char** argv)
 {
-	orbs1.push_back({0.0f, -3024.0f, 0.0f, 0.0f, 0.0f, 0.0f, 3000.0f, 0.800f, 0.0f, 0.0f, INFINITY});
+	shapes.push_back(new plane(0.0f, -24.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.800f, 0.0f, 0.0f, 2048.0f));
 
-	orbs1.push_back({0.0f - 32.0f * 1.0f, -8.0f, -56.0f, 1.000f, 0.000f, 0.000f, 16.0f, 0.600f, 0.0f, 0.0f, 2048.0f});
-	orbs1.push_back({0.0f + 32.0f * 0.0f, -8.0f, -56.0f, 0.000f, 1.000f, 0.000f, 16.0f, 0.600f, 0.0f, 0.0f, 2048.0f});
-	orbs1.push_back({0.0f + 32.0f * 1.0f, -8.0f, -56.0f, 0.000f, 0.000f, 1.000f, 16.0f, 0.600f, 0.0f, 0.0f, 2048.0f});
+	shapes.push_back(new sphere(0.0f - 32.0f * 1.0f, -8.0f, -56.0f, 1.000f, 0.000f, 0.000f, 16.0f, 0.600f, 0.0f, 0.0f, 2048.0f));
+	shapes.push_back(new sphere(0.0f + 32.0f * 0.0f, -8.0f, -56.0f, 0.000f, 1.000f, 0.000f, 18.0f, 0.600f, 0.0f, 0.0f, 2048.0f));
+	shapes.push_back(new sphere(0.0f + 32.0f * 1.0f, -8.0f, -56.0f, 0.000f, 0.000f, 1.000f, 16.0f, 0.600f, 0.0f, 0.0f, 2048.0f));
 
-	orbs2.push_back({25.0f, 50.0f, 0.0f, 1e+4f * 1.4f, 1e+4f * 1.4f, 1e+4f * 1.4f, 50.0f});
+	lights.push_back(light(25.0f, 50.0f, 0.0f, 1e+4f * 1.4f, 1e+4f * 1.4f, 1e+4f * 1.4f, 50.0f));
 
 	int x_res = 128 * 16;
 	int y_res = 128 * 16;
@@ -835,9 +1099,9 @@ int main(int argc, char** argv)
 			ray_dy /= ray_length;
 			ray_dz /= ray_length;
 
-			float color_r;
-			float color_g;
-			float color_b;
+			float color_r = 0.0f;
+			float color_g = 0.0f;
+			float color_b = 0.0f;
 
 			trace
 			(
@@ -854,15 +1118,21 @@ int main(int argc, char** argv)
 				color_b
 			);
 
+			#ifdef GAMMA
+
+			// Gamma correction (slightly broken).
+			
+			pixel[R] = fmax(0.0f, fmin(255.0f, powf(color_r, gamma) * 255.0f));
+			pixel[G] = fmax(0.0f, fmin(255.0f, powf(color_g, gamma) * 255.0f));
+			pixel[B] = fmax(0.0f, fmin(255.0f, powf(color_b, gamma) * 255.0f));
+
+			#else
+
 			pixel[R] = fmax(0.0f, fmin(255.0f, color_r * 255.0f));
 			pixel[G] = fmax(0.0f, fmin(255.0f, color_g * 255.0f));
 			pixel[B] = fmax(0.0f, fmin(255.0f, color_b * 255.0f));
 
-			// // Gamma correction (slightly broken).
-			//
-			// pixel[R] = fmax(0.0f, fmin(255.0f, powf(color_r, gamma) * 255.0f));
-			// pixel[G] = fmax(0.0f, fmin(255.0f, powf(color_g, gamma) * 255.0f));
-			// pixel[B] = fmax(0.0f, fmin(255.0f, powf(color_b, gamma) * 255.0f));
+			#endif
 		}
 	}
 
