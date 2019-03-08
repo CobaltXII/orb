@@ -1175,16 +1175,25 @@ void trace
 
 int main(int argc, char** argv)
 {
-	shapes.push_back(new plane(0.0f, -24.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.800f, 0.0f, 0.0f, 2048.0f));
+	shapes.push_back(new plane(0.0f, 0.0f - 24.0f, 0.0f, 0.0f, 0.0f + 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.000f, 0.0f, 0.0f, 2048.0f));
+	shapes.push_back(new plane(0.0f, 0.0f + 64.0f, 0.0f, 0.0f, 0.0f - 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.000f, 0.0f, 0.0f, 2048.0f));
 
-	shapes.push_back(new sphere(0.0f - 32.0f * 1.0f, -8.0f, -56.0f, 1.000f, 0.000f, 0.000f, 16.0f, 0.600f, 0.0f, 0.0f, 2048.0f));
-	shapes.push_back(new sphere(0.0f + 32.0f * 0.0f, -8.0f, -56.0f, 0.000f, 1.000f, 0.000f, 18.0f, 0.600f, 0.0f, 0.0f, 2048.0f));
-	shapes.push_back(new sphere(0.0f + 32.0f * 1.0f, -8.0f, -56.0f, 0.000f, 0.000f, 1.000f, 16.0f, 0.600f, 0.0f, 0.0f, 2048.0f));
+	// shapes.push_back(new sphere(0.0f - 32.0f * 1.0f, -8.0f, -56.0f, 1.000f, 0.000f, 0.000f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+	// shapes.push_back(new sphere(0.0f + 32.0f * 0.0f, -8.0f, -56.0f, 0.000f, 1.000f, 0.000f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+	// shapes.push_back(new sphere(0.0f + 32.0f * 1.0f, -8.0f, -56.0f, 0.000f, 0.000f, 1.000f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
 
-	lights.push_back(light(25.0f, 50.0f, 0.0f, 1e+4f * 1.4f, 1e+4f * 1.4f, 1e+4f * 1.4f, 50.0f));
+	shapes.push_back(new ellipsoid(0.0f - 32.0f * 1.0f, -8.0f, -56.0f, 1.000f, 0.000f, 0.000f, 16.0f, 24.0f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+	shapes.push_back(new ellipsoid(0.0f + 32.0f * 0.0f, -8.0f, -56.0f, 0.000f, 1.000f, 0.000f, 16.0f, 24.0f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+	shapes.push_back(new ellipsoid(0.0f + 32.0f * 1.0f, -8.0f, -56.0f, 0.000f, 0.000f, 1.000f, 16.0f, 24.0f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
 
-	int x_res = 128 * 16;
-	int y_res = 128 * 16;
+	// shapes.push_back(new ellipsoid(0.0f + 32.0f * 0.0f,32.0f, -128.0f, 0.000f, 1.000f, 0.000f, 320000.0f, 48.0f, 48.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+
+	lights.push_back(light(25.0f, 50.0f, 0.0f, 1e+3f * 5.6f, 1e+3f * 5.6f, 1e+3f * 5.6f, 50.0f));
+
+	int supersample = 3;
+
+	int x_res = (128 * 8) * supersample;
+	int y_res = (128 * 8) * supersample;
 
 	float x_resf = x_res;
 	float y_resf = y_res;
@@ -1285,8 +1294,6 @@ int main(int argc, char** argv)
 			#endif
 		}
 	}
-
-	int supersample = 2;
 
 	if (supersample > 1)
 	{
