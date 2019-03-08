@@ -435,7 +435,7 @@ float cast
 
 		if (shape1->primitive == shape_type::st_sphere)
 		{
-			sphere sphere1 = *(sphere*)shape1;
+			sphere sphere1 = TO_SPHERE(shape1);
 
 			float i_lx = sphere1.x - ray_ox;
 			float i_ly = sphere1.y - ray_oy;
@@ -511,7 +511,7 @@ float cast
 		}
 		else if (shape1->primitive == shape_type::st_plane)
 		{
-			plane plane1 = *(plane*)shape1;
+			plane plane1 = TO_PLANE(shape1);
 
 			float denom =
 			(
@@ -553,6 +553,84 @@ float cast
 						set_ptr(hit_shape, shape1);
 					}
 				}
+			}
+		}
+		else if (shape1->primitive == shape_type::st_ellipsoid)
+		{
+			ellipsoid ellipsoid1 = TO_ELLIPSOID(shape1);
+
+			float oc_x = ray_ox - ellipsoid1.x;
+			float oc_y = ray_oy - ellipsoid1.y;
+			float oc_z = ray_oz - ellipsoid1.z;
+
+			float ocn_x = oc_x / ellipsoid1.radius_x;
+			float ocn_y = oc_y / ellipsoid1.radius_y;
+			float ocn_z = oc_z / ellipsoid1.radius_z;
+
+			float rdn_x = ray_dx / ellipsoid1.radius_x;
+			float rdn_y = ray_dy / ellipsoid1.radius_y;
+			float rdn_z = ray_dz / ellipsoid1.radius_z;
+
+			float a =
+			(
+				rdn_x * rdn_x +
+				rdn_y * rdn_y +
+				rdn_z * rdn_z
+			);
+
+			float b =
+			(
+				ocn_x * rdn_x +
+				ocn_y * rdn_y +
+				ocn_z * rdn_z
+			);
+
+			float c =
+			(
+				ocn_x * ocn_x +
+				ocn_y * ocn_y +
+				ocn_z * ocn_z
+			);
+
+			float h = b * b - a * (c - 1.0f);
+
+			if (h < 0.0f)
+			{
+				continue;
+			}
+
+			float i_d = (-b - sqrtf(h)) / a;
+
+			// This line is kind of buggy, it detects a lot of false
+			// collisions but if we set the epsilon too high then it misses a
+			// lot of true collisions.
+			//
+			// Shadows look really sketchy with a big constant like 1e-2f, but
+			// you will see artifacts on the tips of tall and reflective
+			// ellipsoids if you use something like 1e-3f.
+			//
+			// I still don't know how to fix this, so I use 0.0f (good
+			// shadows) and just don't put large ellipsoids.
+
+			if (i_d < 0.0f)
+			{
+				continue;
+			}
+
+			if (i_d < min_dist)
+			{
+				min_dist = i_d;
+
+				set_ptr(hit_shape_material1, ellipsoid1.material1);
+				set_ptr(hit_shape_material2, ellipsoid1.material2);
+				set_ptr(hit_shape_material3, ellipsoid1.material3);
+				set_ptr(hit_shape_material4, ellipsoid1.material4);
+
+				set_ptr(hit_shape_r, ellipsoid1.r);
+				set_ptr(hit_shape_g, ellipsoid1.g);
+				set_ptr(hit_shape_b, ellipsoid1.b);
+
+				set_ptr(hit_shape, shape1);
 			}
 		}
 	}
