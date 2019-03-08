@@ -755,7 +755,7 @@ void trace
 				2.0f, 0.5f, 6
 			);
 
-			out_r = (noise + 1.0f) / 2.0f * 0.3f;
+			out_r = fmax(0.0f, fmin(1.0f, (noise + 1.0f) / 2.0f * 0.032f));
 		}
 
 		return;
@@ -786,6 +786,12 @@ void trace
 		norm_y = TO_PLANE(hit_shape).norm_y;
 		norm_z = TO_PLANE(hit_shape).norm_z;
 	}
+	else if (hit_shape->primitive == shape_type::st_ellipsoid)
+	{
+		norm_x = (hit_x - TO_ELLIPSOID(hit_shape).x) / TO_ELLIPSOID(hit_shape).radius_x;
+		norm_y = (hit_y - TO_ELLIPSOID(hit_shape).y) / TO_ELLIPSOID(hit_shape).radius_y;
+		norm_z = (hit_z - TO_ELLIPSOID(hit_shape).z) / TO_ELLIPSOID(hit_shape).radius_z;
+	}
 
 	float norm_length = sqrtf
 	(
@@ -800,7 +806,7 @@ void trace
 
 	// Small spheres should be procedurally textured.
 
-	if (hit_shape->primitive == shape_type::st_sphere && TO_SPHERE(hit_shape).radius < 200.0f)
+	if (hit_shape->primitive == shape_type::st_sphere || hit_shape->primitive == shape_type::st_ellipsoid)
 	{
 		float frequency = 0.48f;
 
@@ -1157,6 +1163,14 @@ void trace
 		out_g = out_g * (1.0f - hit_shape_material2) + refract_g * hit_shape_material2;
 		out_b = out_b * (1.0f - hit_shape_material2) + refract_b * hit_shape_material2;
 	}
+
+	#ifndef REALLY_BRIGHT_LIGHTS
+
+	out_r = fmax(0.0f, fmin(1.0f, out_r));
+	out_g = fmax(0.0f, fmin(1.0f, out_g));
+	out_b = fmax(0.0f, fmin(1.0f, out_b));
+
+	#endif
 }
 
 int main(int argc, char** argv)
