@@ -33,7 +33,7 @@ inline void set_ptr(T* __ptr, T __value)
 
 enum shape_type
 {
-	st_sphere, st_plane, st_ellipsoid
+	st_sphere, st_plane, st_ellipsoid, st_cone
 };
 
 struct shape
@@ -155,6 +155,66 @@ inline ellipsoid TO_ELLIPSOID(shape* __victim)
 {
 	return *((ellipsoid*)__victim);
 }
+
+struct cone: shape
+{
+	float a_x;
+	float a_y;
+	float a_z;
+
+	float b_x;
+	float b_y;
+	float b_z;
+
+	float radius_a;
+	float radius_b;
+
+	cone
+	(
+		float a_x,
+		float a_y,
+		float a_z,
+
+		float b_x,
+		float b_y,
+		float b_z,
+
+		float r,
+		float g,
+		float b,
+
+		float radius_a,
+		float radius_b,
+
+		float material1 = 0.0f,
+		float material2 = 0.0f,
+		float material3 = 0.0f,
+		float material4 = 0.0f
+	)
+	{
+		this->primitive = shape_type::st_cone;
+
+		this->a_x = a_x;
+		this->a_y = a_y;
+		this->a_z = a_z;
+
+		this->b_x = b_x;
+		this->b_y = b_y;
+		this->b_z = b_z;
+
+		this->r = r;
+		this->g = g;
+		this->b = b;
+
+		this->radius_a = radius_a;
+		this->radius_b = radius_b;
+
+		this->material1 = material1;
+		this->material2 = material2;
+		this->material3 = material3;
+		this->material4 = material4;
+	}
+};
 
 struct plane: shape
 {
@@ -422,6 +482,10 @@ float cast
 	float* hit_shape_g = NULL,
 	float* hit_shape_b = NULL,
 
+	float* norm_x = NULL,
+	float* norm_y = NULL,
+	float* norm_z = NULL,
+
 	shape** hit_shape = NULL
 )
 {
@@ -507,6 +571,12 @@ float cast
 				set_ptr(hit_shape_b, sphere1.b);
 
 				set_ptr(hit_shape, shape1);
+
+				// Surface normal.
+
+				set_ptr(norm_x, (ray_ox + ray_dx * i_d) - sphere1.x);
+				set_ptr(norm_y, (ray_oy + ray_dy * i_d) - sphere1.y);
+				set_ptr(norm_z, (ray_oz + ray_dz * i_d) - sphere1.z);
 			}
 		}
 		else if (shape1->primitive == shape_type::st_plane)
@@ -551,6 +621,12 @@ float cast
 						set_ptr(hit_shape_b, plane1.b);
 
 						set_ptr(hit_shape, shape1);
+
+						// Surface normal.
+
+						set_ptr(norm_x, plane1.norm_x);
+						set_ptr(norm_y, plane1.norm_y);
+						set_ptr(norm_z, plane1.norm_z);
 					}
 				}
 			}
@@ -558,15 +634,6 @@ float cast
 		else if (shape1->primitive == shape_type::st_ellipsoid)
 		{
 			ellipsoid ellipsoid1 = TO_ELLIPSOID(shape1);
-
-			#define CYRILLE_FAVREAU_ELLIPSOID
-
-			#ifdef CYRILLE_FAVREAU_ELLIPSOID
-
-			// The ray-ellipsoid interesction function by Cyrille Favreau.
-			// Seems to work better than the one by Inigo Quilez.
-			//
-			// http://cudaopencl.blogspot.com/2012/12/ellipsoids-finally-added-to-ray-tracing.html
 
 			float oc_x = ray_ox - ellipsoid1.x;
 			float oc_y = ray_oy - ellipsoid1.y;
@@ -646,70 +713,6 @@ float cast
 
 			float i_d = t;
 
-			#else
-
-			// The ray-ellipsoid interesction function by Inigo Quilez.
-
-			float oc_x = ray_ox - ellipsoid1.x;
-			float oc_y = ray_oy - ellipsoid1.y;
-			float oc_z = ray_oz - ellipsoid1.z;
-
-			float ocn_x = oc_x / ellipsoid1.radius_x;
-			float ocn_y = oc_y / ellipsoid1.radius_y;
-			float ocn_z = oc_z / ellipsoid1.radius_z;
-
-			float rdn_x = ray_dx / ellipsoid1.radius_x;
-			float rdn_y = ray_dy / ellipsoid1.radius_y;
-			float rdn_z = ray_dz / ellipsoid1.radius_z;
-
-			float a =
-			(
-				rdn_x * rdn_x +
-				rdn_y * rdn_y +
-				rdn_z * rdn_z
-			);
-
-			float b =
-			(
-				ocn_x * rdn_x +
-				ocn_y * rdn_y +
-				ocn_z * rdn_z
-			);
-
-			float c =
-			(
-				ocn_x * ocn_x +
-				ocn_y * ocn_y +
-				ocn_z * ocn_z
-			);
-
-			float h = b * b - a * (c - 1.0f);
-
-			if (h < 0.0f)
-			{
-				continue;
-			}
-
-			float i_d = (-b - sqrtf(h)) / a;
-
-			// This line is kind of buggy, it detects a lot of false
-			// collisions but if we set the epsilon too high then it misses a
-			// lot of true collisions.
-			//
-			// Shadows look really sketchy with a big constant like 1e-2f, but
-			// you will see artifacts on the tips of tall and reflective
-			// ellipsoids if you use something like 1e-3f.
-			//
-			// I still don't know how to fix this, so I use 0.0f (good
-			// shadows) and just don't put large ellipsoids.
-
-			if (i_d < -1.0f)
-			{
-				continue;
-			}
-
-			#endif
-
 			if (i_d < min_dist)
 			{
 				min_dist = i_d;
@@ -724,6 +727,12 @@ float cast
 				set_ptr(hit_shape_b, ellipsoid1.b);
 
 				set_ptr(hit_shape, shape1);
+
+				// Surface normal.
+
+				set_ptr(norm_x, ((ray_ox + ray_dx * i_d) - ellipsoid1.x) / ellipsoid1.radius_x);
+				set_ptr(norm_y, ((ray_oy + ray_dy * i_d) - ellipsoid1.y) / ellipsoid1.radius_y);
+				set_ptr(norm_z, ((ray_oz + ray_dz * i_d) - ellipsoid1.z) / ellipsoid1.radius_z);
 			}
 		}
 	}
@@ -759,6 +768,10 @@ void trace
 	float hit_shape_g;
 	float hit_shape_b;
 
+	float norm_x;
+	float norm_y;
+	float norm_z;
+
 	shape* hit_shape;
 
 	float min_dist = cast
@@ -779,6 +792,10 @@ void trace
 		&hit_shape_r,
 		&hit_shape_g,
 		&hit_shape_b,
+
+		&norm_x,
+		&norm_y,
+		&norm_z,
 
 		&hit_shape
 	);
@@ -854,37 +871,7 @@ void trace
 		return;
 	}
 
-	// Hit something. Find the color using contributions from light, shadow,
-	// reflection rays, etc.
-
-	float hit_x = ray_ox + ray_dx * min_dist;
-	float hit_y = ray_oy + ray_dy * min_dist;
-	float hit_z = ray_oz + ray_dz * min_dist;
-
-	float norm_x;
-	float norm_y;
-	float norm_z;
-
-	// Compute surface normal.
-
-	if (hit_shape->primitive == shape_type::st_sphere)
-	{
-		norm_x = hit_x - TO_SPHERE(hit_shape).x;
-		norm_y = hit_y - TO_SPHERE(hit_shape).y;
-		norm_z = hit_z - TO_SPHERE(hit_shape).z;
-	}
-	else if (hit_shape->primitive == shape_type::st_plane)
-	{
-		norm_x = TO_PLANE(hit_shape).norm_x;
-		norm_y = TO_PLANE(hit_shape).norm_y;
-		norm_z = TO_PLANE(hit_shape).norm_z;
-	}
-	else if (hit_shape->primitive == shape_type::st_ellipsoid)
-	{
-		norm_x = (hit_x - TO_ELLIPSOID(hit_shape).x) / TO_ELLIPSOID(hit_shape).radius_x;
-		norm_y = (hit_y - TO_ELLIPSOID(hit_shape).y) / TO_ELLIPSOID(hit_shape).radius_y;
-		norm_z = (hit_z - TO_ELLIPSOID(hit_shape).z) / TO_ELLIPSOID(hit_shape).radius_z;
-	}
+	// Normalize the surface normal.
 
 	float norm_length = sqrtf
 	(
@@ -896,6 +883,13 @@ void trace
 	norm_x /= norm_length;
 	norm_y /= norm_length;
 	norm_z /= norm_length;
+
+	// Hit something. Find the color using contributions from light, shadow,
+	// reflection rays, etc.
+
+	float hit_x = ray_ox + ray_dx * min_dist;
+	float hit_y = ray_oy + ray_dy * min_dist;
+	float hit_z = ray_oz + ray_dz * min_dist;
 
 	// Small spheres should be procedurally textured.
 
