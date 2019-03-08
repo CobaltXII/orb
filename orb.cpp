@@ -559,6 +559,95 @@ float cast
 		{
 			ellipsoid ellipsoid1 = TO_ELLIPSOID(shape1);
 
+			#ifdef CYRILLE_FAVREAU_ELLIPSOID
+
+			// The ray-ellipsoid interesction function by Cyrille Favreau.
+			// Seems to work better than the one by Inigo Quilez.
+			//
+			// http://cudaopencl.blogspot.com/2012/12/ellipsoids-finally-added-to-ray-tracing.html
+
+			float oc_x = ray_ox - ellipsoid1.x;
+			float oc_y = ray_oy - ellipsoid1.y;
+			float oc_z = ray_oz - ellipsoid1.z;
+
+			float a =
+			(
+				(ray_dx * ray_dx) / (ellipsoid1.radius_x * ellipsoid1.radius_x) +
+				(ray_dy * ray_dy) / (ellipsoid1.radius_y * ellipsoid1.radius_y) +
+				(ray_dz * ray_dz) / (ellipsoid1.radius_z * ellipsoid1.radius_z)
+			);
+
+			float b =
+			(
+				(2.0f * oc_x * ray_dx) / (ellipsoid1.radius_x * ellipsoid1.radius_x) +
+				(2.0f * oc_y * ray_dy) / (ellipsoid1.radius_y * ellipsoid1.radius_y) +
+				(2.0f * oc_z * ray_dz) / (ellipsoid1.radius_z * ellipsoid1.radius_z)
+			);
+
+			float c =
+			(
+				(oc_x * oc_x) / (ellipsoid1.radius_x * ellipsoid1.radius_x) +
+				(oc_y * oc_y) / (ellipsoid1.radius_y * ellipsoid1.radius_y) +
+				(oc_z * oc_z) / (ellipsoid1.radius_z * ellipsoid1.radius_z)
+
+				- 1.0f
+			);
+
+			float d = b * b - 4.0f * a * c;
+
+			if (d < 0.0f || a == 0.0f || b == 0.0f || c == 0.0f)
+			{
+				continue;
+			}
+
+			d = sqrtf(d);
+
+			float t1 = (-b + d) / (2.0f * a);
+			float t2 = (-b - d) / (2.0f * a);
+
+			float eps = 0.0f;
+
+			if (t1 <= eps && t2 <= eps)
+			{
+				continue;
+			}
+
+			float t = 0.0f;
+
+			if (t1 <= eps)
+			{
+				t = t2;
+			}
+			else
+			{
+				if (t2 <= eps)
+				{
+					t = t1;
+				}
+				else
+				{
+					if (t1 < t2)
+					{
+						t = t1;
+					}
+					else
+					{
+						t = t2;
+					}
+				}
+			}
+
+			if (t < eps)
+			{
+				continue;
+			}
+
+			float i_d = t;
+
+			#else
+
+			// The ray-ellipsoid interesction function by Inigo Quilez.
+
 			float oc_x = ray_ox - ellipsoid1.x;
 			float oc_y = ray_oy - ellipsoid1.y;
 			float oc_z = ray_oz - ellipsoid1.z;
@@ -612,10 +701,12 @@ float cast
 			// I still don't know how to fix this, so I use 0.0f (good
 			// shadows) and just don't put large ellipsoids.
 
-			if (i_d < 0.0f)
+			if (i_d < -1.0f)
 			{
 				continue;
 			}
+
+			#endif
 
 			if (i_d < min_dist)
 			{
