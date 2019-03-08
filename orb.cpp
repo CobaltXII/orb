@@ -559,6 +559,8 @@ float cast
 		{
 			ellipsoid ellipsoid1 = TO_ELLIPSOID(shape1);
 
+			#define CYRILLE_FAVREAU_ELLIPSOID
+
 			#ifdef CYRILLE_FAVREAU_ELLIPSOID
 
 			// The ray-ellipsoid interesction function by Cyrille Favreau.
