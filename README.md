@@ -4,7 +4,7 @@
 
 ## Summary
 
-Orb started out as a weekend raytracing project, but got a little bigger. It currently supports diffuse lighting, specular lighting, recursion, reflection, refraction, procedural environments, procedural texturing, supersampling, and gamma correction. As of now, Orb only supports raytracing spheres. More features will be added soon!
+Orb started out as a weekend raytracing project, but got a little bigger. It currently supports diffuse lighting, specular lighting, recursion, reflection, refraction, procedural environments, procedural texturing, supersampling, and gamma correction. Orb was named Orb originally because it could only raytrace spheres, but it can now raytrace ellipsoids, planes and cones as well.
 
 ## Libraries
 
@@ -35,3 +35,7 @@ Just link the libraries and compile as default.
 ```bash
 clang++ orb.cpp lib/stb_image.o lib/stb_image_write.o lib/stb_perlin.o -o orb -std=c++11 -Ofast && ./orb
 ```
+
+## Credits
+
+Thanks to Inigo Quilez for his great articles and intersector functions. Thanks to Cyrille Favreau for his ellipsoid intersection function. Thanks to Brook Heisler for a great tutorial on getting started with raytracing. Without you guys, this project would never have happened, so thanks!
