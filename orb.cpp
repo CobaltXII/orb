@@ -1,3 +1,5 @@
+#define GAMMA
+
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -31,7 +33,7 @@ inline void set_ptr(T* __ptr, T __value)
 
 enum shape_type
 {
-	st_sphere, st_plane
+	st_sphere, st_plane, st_ellipsoid
 };
 
 struct shape
@@ -96,6 +98,62 @@ struct sphere: shape
 inline sphere TO_SPHERE(shape* __victim)
 {
 	return *((sphere*)__victim);
+}
+
+struct ellipsoid: shape
+{
+	float x;
+	float y;
+	float z;
+
+	float radius_x;
+	float radius_y;
+	float radius_z;
+
+	ellipsoid
+	(
+		float x,
+		float y,
+		float z,
+
+		float r,
+		float g,
+		float b,
+
+		float radius_x,
+		float radius_y,
+		float radius_z,
+
+		float material1 = 0.0f,
+		float material2 = 0.0f,
+		float material3 = 0.0f,
+		float material4 = 0.0f
+	)
+	{
+		this->primitive = shape_type::st_ellipsoid;
+
+		this->x = x;
+		this->y = y;
+		this->z = z;
+
+		this->r = r;
+		this->g = g;
+		this->b = b;
+
+		this->radius_x = radius_x;
+		this->radius_y = radius_y;
+		this->radius_z = radius_z;
+
+		this->material1 = material1;
+		this->material2 = material2;
+		this->material3 = material3;
+		this->material4 = material4;
+	}
+};
+
+inline ellipsoid TO_ELLIPSOID(shape* __victim)
+{
+	return *((ellipsoid*)__victim);
 }
 
 struct plane: shape
