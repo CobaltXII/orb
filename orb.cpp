@@ -1738,14 +1738,37 @@ void trace
 
 int main(int argc, char** argv)
 {
+	lights.push_back(light(25.0f, 50.0f, 0.0f, 1e+3f * 5.6f, 1e+3f * 5.6f, 1e+3f * 5.6f, 50.0f));
+	
 	shapes.push_back(new plane(0.0f, 0.0f - 24.0f, 0.0f, 0.0f, 0.0f + 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.000f, 0.0f, 0.0f, 2048.0f));
 	shapes.push_back(new plane(0.0f, 0.0f + 64.0f, 0.0f, 0.0f, 0.0f - 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.000f, 0.0f, 0.0f, 2048.0f));
 
-	shapes.push_back(new cone(0.0f - 32.0f * 1.0f, -24.0f, -56.0f, 0.0f - 32.0f * 1.0f, 16.0f, -56.0f, 1.000f, 0.000f, 0.000f, 16.0f, 4.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-	shapes.push_back(new cone(0.0f + 32.0f * 0.0f, -24.0f, -56.0f, 0.0f + 32.0f * 0.0f, 16.0f, -56.0f, 0.000f, 1.000f, 0.000f, 16.0f, 4.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-	shapes.push_back(new cone(0.0f + 32.0f * 1.0f, -24.0f, -56.0f, 0.0f + 32.0f * 1.0f, 16.0f, -56.0f, 0.000f, 0.000f, 1.000f, 16.0f, 4.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+	shape_type exhibit = st_capsule;
 
-	lights.push_back(light(25.0f, 50.0f, 0.0f, 1e+3f * 5.6f, 1e+3f * 5.6f, 1e+3f * 5.6f, 50.0f));
+	if (exhibit == shape_type::st_sphere)
+	{
+		shapes.push_back(new sphere(0.0f - 32.0f * 1.0f, -8.0f, -56.0f, 1.000f, 0.000f, 0.000f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+		shapes.push_back(new sphere(0.0f + 32.0f * 0.0f, -8.0f, -56.0f, 0.000f, 1.000f, 0.000f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+		shapes.push_back(new sphere(0.0f + 32.0f * 1.0f, -8.0f, -56.0f, 0.000f, 0.000f, 1.000f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+	}
+	else if (exhibit == shape_type::st_ellipsoid)
+	{
+		shapes.push_back(new ellipsoid(0.0f - 32.0f * 1.0f, -8.0f, -56.0f, 1.000f, 0.000f, 0.000f, 16.0f, 24.0f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+		shapes.push_back(new ellipsoid(0.0f + 32.0f * 0.0f, -8.0f, -56.0f, 0.000f, 1.000f, 0.000f, 16.0f, 24.0f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+		shapes.push_back(new ellipsoid(0.0f + 32.0f * 1.0f, -8.0f, -56.0f, 0.000f, 0.000f, 1.000f, 16.0f, 24.0f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+	}
+	else if (exhibit == shape_type::st_cone)
+	{
+		shapes.push_back(new cone(0.0f - 32.0f * 1.0f, -24.0f, -56.0f, 0.0f - 32.0f * 1.0f, 16.0f, -56.0f, 1.000f, 0.000f, 0.000f, 16.0f, -16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+		shapes.push_back(new cone(0.0f + 32.0f * 0.0f, -24.0f, -56.0f, 0.0f + 32.0f * 0.0f, 16.0f, -56.0f, 0.000f, 1.000f, 0.000f, 16.0f, -16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+		shapes.push_back(new cone(0.0f + 32.0f * 1.0f, -24.0f, -56.0f, 0.0f + 32.0f * 1.0f, 16.0f, -56.0f, 0.000f, 0.000f, 1.000f, 16.0f, -16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+	}
+	else if (exhibit == shape_type::st_capsule)
+	{
+		shapes.push_back(new capsule(0.0f - 32.0f * 1.0f, -24.0f, -56.0f, 0.0f - 32.0f * 1.0f, 16.0f, -56.0f, 1.000f, 0.000f, 0.000f, 15.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+		shapes.push_back(new capsule(0.0f + 32.0f * 0.0f, -24.0f, -56.0f, 0.0f + 32.0f * 0.0f, 16.0f, -56.0f, 0.000f, 1.000f, 0.000f, 15.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+		shapes.push_back(new capsule(0.0f + 32.0f * 1.0f, -24.0f, -56.0f, 0.0f + 32.0f * 1.0f, 16.0f, -56.0f, 0.000f, 0.000f, 1.000f, 15.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+	}
 
 	int supersample = 3;
 
