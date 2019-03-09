@@ -1104,35 +1104,6 @@ void trace
 	float hit_y = ray_oy + ray_dy * min_dist;
 	float hit_z = ray_oz + ray_dz * min_dist;
 
-	// Small spheres should be procedurally textured.
-
-	if (hit_shape->primitive == shape_type::st_sphere || hit_shape->primitive == shape_type::st_ellipsoid)
-	{
-		float frequency = 0.48f;
-
-		float noise = stb_perlin_ridge_noise3
-		(
-			hit_x * frequency,
-			hit_y * frequency,
-			hit_z * frequency,
-
-			2.0f, 0.5f, 1.0f, 6
-		);
-
-		if (hit_shape_r > 0.5f)
-		{
-			hit_shape_r = (noise + 1.0f) / 2.0f;
-		}
-		else if (hit_shape_g > 0.5f)
-		{
-			hit_shape_g = (noise + 1.0f) / 2.0f;
-		}
-		else if (hit_shape_b > 0.5f)
-		{
-			hit_shape_b = (noise + 1.0f) / 2.0f;
-		}
-	}
-
 	// Check for planes, which should be checkered.
 
 	if (hit_shape->primitive == shape_type::st_plane)
@@ -1177,6 +1148,34 @@ void trace
 			hit_shape_r = 0.85f * 2.0f;
 			hit_shape_g = 0.85f * 2.0f;
 			hit_shape_b = 0.85f * 2.0f;
+		}
+	}
+	else
+	{
+		// Everything else gets a procedural texture.
+
+		float frequency = 0.48f;
+
+		float noise = stb_perlin_ridge_noise3
+		(
+			hit_x * frequency,
+			hit_y * frequency,
+			hit_z * frequency,
+
+			2.0f, 0.5f, 1.0f, 6
+		);
+
+		if (hit_shape_r > 0.5f)
+		{
+			hit_shape_r = (noise + 1.0f) / 2.0f;
+		}
+		else if (hit_shape_g > 0.5f)
+		{
+			hit_shape_g = (noise + 1.0f) / 2.0f;
+		}
+		else if (hit_shape_b > 0.5f)
+		{
+			hit_shape_b = (noise + 1.0f) / 2.0f;
 		}
 	}
 
@@ -1478,15 +1477,9 @@ int main(int argc, char** argv)
 	shapes.push_back(new plane(0.0f, 0.0f - 24.0f, 0.0f, 0.0f, 0.0f + 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.000f, 0.0f, 0.0f, 2048.0f));
 	shapes.push_back(new plane(0.0f, 0.0f + 64.0f, 0.0f, 0.0f, 0.0f - 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.000f, 0.0f, 0.0f, 2048.0f));
 
-	// shapes.push_back(new sphere(0.0f - 32.0f * 1.0f, -8.0f, -56.0f, 1.000f, 0.000f, 0.000f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-	// shapes.push_back(new sphere(0.0f + 32.0f * 0.0f, -8.0f, -56.0f, 0.000f, 1.000f, 0.000f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-	// shapes.push_back(new sphere(0.0f + 32.0f * 1.0f, -8.0f, -56.0f, 0.000f, 0.000f, 1.000f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-
-	shapes.push_back(new ellipsoid(0.0f - 32.0f * 1.0f, -8.0f, -56.0f, 1.000f, 0.000f, 0.000f, 16.0f, 24.0f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-	shapes.push_back(new ellipsoid(0.0f + 32.0f * 0.0f, -8.0f, -56.0f, 0.000f, 1.000f, 0.000f, 16.0f, 24.0f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-	shapes.push_back(new ellipsoid(0.0f + 32.0f * 1.0f, -8.0f, -56.0f, 0.000f, 0.000f, 1.000f, 16.0f, 24.0f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-
-	// shapes.push_back(new ellipsoid(0.0f + 32.0f * 0.0f,32.0f, -128.0f, 0.000f, 1.000f, 0.000f, 320000.0f, 48.0f, 48.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+	shapes.push_back(new cone(0.0f - 32.0f * 1.0f, -24.0f, -56.0f, 0.0f - 32.0f * 1.0f, 16.0f, -56.0f, 1.000f, 0.000f, 0.000f, 16.0f, 4.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+	shapes.push_back(new cone(0.0f + 32.0f * 0.0f, -24.0f, -56.0f, 0.0f + 32.0f * 0.0f, 16.0f, -56.0f, 0.000f, 1.000f, 0.000f, 16.0f, 4.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+	shapes.push_back(new cone(0.0f + 32.0f * 1.0f, -24.0f, -56.0f, 0.0f + 32.0f * 1.0f, 16.0f, -56.0f, 0.000f, 0.000f, 1.000f, 16.0f, 4.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
 
 	lights.push_back(light(25.0f, 50.0f, 0.0f, 1e+3f * 5.6f, 1e+3f * 5.6f, 1e+3f * 5.6f, 50.0f));
 
