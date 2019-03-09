@@ -519,7 +519,7 @@ inline void plane_uv
 {
 	if (plane_normal_y == 0.0f)
 	{
-		plane_normal_y = std::max(plane_normal_x, plane_normal_z);
+		plane_normal_y = plane_normal_z;
 	}
 
 	float x_axis_x = plane_normal_y * 1.0f - 0.0f * plane_normal_z;
