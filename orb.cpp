@@ -1746,9 +1746,9 @@ void trace
 
 		float specular_coefficient = powf(fmax(dot_view_specular, 0.0f), hit_shape_material4);
 
-		out_r += fmax(0.0f, light1.r * specular_coefficient);
-		out_g += fmax(0.0f, light1.g * specular_coefficient);
-		out_b += fmax(0.0f, light1.b * specular_coefficient);
+		out_r += fmax(0.0f, light1.r * specular_coefficient * specular_constant);
+		out_g += fmax(0.0f, light1.g * specular_coefficient * specular_constant);
+		out_b += fmax(0.0f, light1.b * specular_coefficient * specular_constant);
 	}
 
 	// Prevent infinite recursion.
