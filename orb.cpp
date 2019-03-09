@@ -35,7 +35,7 @@ inline void set_ptr(T* __ptr, T __value)
 
 enum shape_type
 {
-	st_sphere, st_plane, st_ellipsoid, st_cone
+	st_sphere, st_plane, st_ellipsoid, st_cone, st_capsule
 };
 
 struct shape
@@ -221,6 +221,68 @@ struct cone: shape
 inline cone TO_CONE(shape* __victim)
 {
 	return *((cone*)__victim);
+}
+
+struct capsule: shape
+{
+	float a_x;
+	float a_y;
+	float a_z;
+
+	float b_x;
+	float b_y;
+	float b_z;
+
+	float radius;
+
+	capsule
+	(
+		float a_x,
+		float a_y,
+		float a_z,
+
+		float b_x,
+		float b_y,
+		float b_z,
+
+		float r,
+		float g,
+		float b,
+
+		float radius,
+
+		float material1 = 0.0f,
+		float material2 = 0.0f,
+		float material3 = 0.0f,
+		float material4 = 0.0f
+	)
+	{
+		this->primitive = shape_type::st_capsule;
+
+		this->a_x = a_x;
+		this->a_y = a_y;
+		this->a_z = a_z;
+
+		this->b_x = b_x;
+		this->b_y = b_y;
+		this->b_z = b_z;
+
+		this->r = r;
+		this->g = g;
+		this->b = b;
+
+		this->radius = radius;
+
+		this->material1 = material1;
+		this->material2 = material2;
+		this->material3 = material3;
+		this->material4 = material4;
+	}
+};
+
+inline capsule TO_CAPSULE(shape* __victim)
+{
+	return *((capsule*)__victim);
 }
 
 struct plane: shape
@@ -945,6 +1007,208 @@ float cast
 					set_ptr(norm_x, baba * (baba * (oa_x + t * ray_dx) - rbra * ba_x * cone1.radius_a) - ba_x * hyhy * y);
 					set_ptr(norm_y, baba * (baba * (oa_y + t * ray_dy) - rbra * ba_y * cone1.radius_a) - ba_y * hyhy * y);
 					set_ptr(norm_z, baba * (baba * (oa_z + t * ray_dz) - rbra * ba_z * cone1.radius_a) - ba_z * hyhy * y);
+				}
+			}
+		}
+		else if (shape1->primitive == shape_type::st_capsule)
+		{
+			capsule capsule1 = TO_CAPSULE(shape1);
+
+			float ba_x = capsule1.b_x - capsule1.a_x;
+			float ba_y = capsule1.b_y - capsule1.a_y;
+			float ba_z = capsule1.b_z - capsule1.a_z;
+
+			float oa_x = ray_ox - capsule1.a_x;
+			float oa_y = ray_oy - capsule1.a_y;
+			float oa_z = ray_oz - capsule1.a_z;
+
+			float baba =
+			(
+				ba_x * ba_x +
+				ba_y * ba_y +
+				ba_z * ba_z
+			);
+
+			float bard =
+			(
+				ba_x * ray_dx +
+				ba_y * ray_dy +
+				ba_z * ray_dz
+			);
+
+			float baoa =
+			(
+				ba_x * oa_x +
+				ba_y * oa_y +
+				ba_z * oa_z
+			);
+
+			float rdoa =
+			(
+				ray_dx * oa_x +
+				ray_dy * oa_y +
+				ray_dz * oa_z
+			);
+
+			float oaoa =
+			(
+				oa_x * oa_x +
+				oa_y * oa_y +
+				oa_z * oa_z
+			);
+
+			float a = baba - bard * bard;
+
+			float b = baba * rdoa - baoa * bard;
+
+			float c =
+			(
+				baba * oaoa -
+				baoa * baoa -
+
+				capsule1.radius *
+				capsule1.radius
+
+				* baba
+			);
+
+			float h = b * b - a * c;
+
+			if (h >= 0.0f)
+			{
+				float t = (-b - sqrtf(h)) / a;
+
+				float y = baoa + t * bard;
+
+				if (y > 0.0f && y < baba)
+				{
+					if (t < 0.0f)
+					{
+						continue;
+					}
+
+					if (t < min_dist)
+					{
+						min_dist = t;
+
+						set_ptr(hit_shape_material1, capsule1.material1);
+						set_ptr(hit_shape_material2, capsule1.material2);
+						set_ptr(hit_shape_material3, capsule1.material3);
+						set_ptr(hit_shape_material4, capsule1.material4);
+
+						set_ptr(hit_shape_r, capsule1.r);
+						set_ptr(hit_shape_g, capsule1.g);
+						set_ptr(hit_shape_b, capsule1.b);
+
+						set_ptr(hit_shape, shape1);
+
+						// Surface normal.
+
+						float hit_x = ray_ox + ray_dx * t;
+						float hit_y = ray_oy + ray_dy * t;
+						float hit_z = ray_oz + ray_dz * t;
+
+						float pa_x = hit_x - capsule1.a_x;
+						float pa_y = hit_y - capsule1.a_y;
+						float pa_z = hit_z - capsule1.a_z;
+
+						float paba =
+						(
+							pa_x * ba_x +
+							pa_y * ba_y +
+							pa_z * ba_z
+						);
+
+						float q = fmax(0.0f, fmin(1.0f, paba / baba));
+
+						set_ptr(norm_x, (pa_x - q * ba_x) / capsule1.radius);
+						set_ptr(norm_y, (pa_y - q * ba_y) / capsule1.radius);
+						set_ptr(norm_z, (pa_z - q * ba_z) / capsule1.radius);
+					}
+				}
+
+				float oc_x;
+				float oc_y;
+				float oc_z;
+
+				if (y <= 0.0f)
+				{
+					oc_x = oa_x;
+					oc_y = oa_y;
+					oc_z = oa_z;
+				}
+				else
+				{
+					oc_x = ray_ox - capsule1.b_x;
+					oc_y = ray_oy - capsule1.b_y;
+					oc_z = ray_oz - capsule1.b_z;
+				}
+
+				b =
+				(
+					ray_dx * oc_x +
+					ray_dy * oc_y +
+					ray_dz * oc_z
+				);
+
+				c =
+				(
+					oc_x * oc_x +
+					oc_y * oc_y +
+					oc_z * oc_z
+
+					- capsule1.radius * capsule1.radius
+				);
+
+				h = b * b - c;
+
+				if (h > 0.0f)
+				{
+					t = -b - sqrtf(h);
+
+					if (t < 0.0f)
+					{
+						continue;
+					}
+
+					if (t < min_dist)
+					{
+						min_dist = t;
+
+						set_ptr(hit_shape_material1, capsule1.material1);
+						set_ptr(hit_shape_material2, capsule1.material2);
+						set_ptr(hit_shape_material3, capsule1.material3);
+						set_ptr(hit_shape_material4, capsule1.material4);
+
+						set_ptr(hit_shape_r, capsule1.r);
+						set_ptr(hit_shape_g, capsule1.g);
+						set_ptr(hit_shape_b, capsule1.b);
+
+						set_ptr(hit_shape, shape1);
+
+						// Surface normal.
+
+						float hit_x = ray_ox + ray_dx * t;
+						float hit_y = ray_oy + ray_dy * t;
+						float hit_z = ray_oz + ray_dz * t;
+
+						float pa_x = hit_x - capsule1.a_x;
+						float pa_y = hit_y - capsule1.a_y;
+						float pa_z = hit_z - capsule1.a_z;
+
+						float paba =
+						(
+							pa_x * ba_x +
+							pa_y * ba_y +
+							pa_z * ba_z
+						);
+
+						float q = fmax(0.0f, fmin(1.0f, paba / baba));
+
+						set_ptr(norm_x, (pa_x - q * ba_x) / capsule1.radius);
+						set_ptr(norm_y, (pa_y - q * ba_y) / capsule1.radius);
+						set_ptr(norm_z, (pa_z - q * ba_z) / capsule1.radius);
+					}
 				}
 			}
 		}
