@@ -2162,6 +2162,10 @@ int main(int argc, char** argv)
 					)
 				);
 			}
+			else
+			{
+				nuke("Unknown type name (main).");
+			}
 		}
 	}
 
