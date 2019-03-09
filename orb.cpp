@@ -1638,18 +1638,9 @@ void trace
 			2.0f, 0.5f, 1.0f, 6
 		);
 
-		if (hit_shape_r > 0.5f)
-		{
-			hit_shape_r = (noise + 1.0f) / 2.0f;
-		}
-		else if (hit_shape_g > 0.5f)
-		{
-			hit_shape_g = (noise + 1.0f) / 2.0f;
-		}
-		else if (hit_shape_b > 0.5f)
-		{
-			hit_shape_b = (noise + 1.0f) / 2.0f;
-		}
+		hit_shape_r = hit_shape_r * ((noise + 1.0f) / 2.0f);
+		hit_shape_g = hit_shape_g * ((noise + 1.0f) / 2.0f);
+		hit_shape_b = hit_shape_b * ((noise + 1.0f) / 2.0f);
 	}
 
 	// Calculate lighting.
