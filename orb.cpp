@@ -7,6 +7,9 @@
 #include <memory>
 #include <limits>
 #include <random>
+#include <map>
+
+#include "inih/ini.h"
 
 #define sign(x) ((x > 0.0f) - (x < 0.0f))
 
@@ -1942,55 +1945,239 @@ void trace
 	#endif
 }
 
+std::map<std::string, std::map<std::string, std::string>> ini_file;
+
+int inii(std::string section, std::string name)
+{
+	return std::stoi(ini_file.at(section).at(name));
+}
+
+float inif(std::string section, std::string name)
+{
+	return std::stof(ini_file.at(section).at(name));
+}
+
+std::string inis(std::string section, std::string name)
+{
+	return ini_file.at(section).at(name);
+}
+
+int ini_parser(void* user, const char* section, const char* name, const char* value)
+{
+	ini_file[std::string(section)][std::string(name)] = value;
+
+	return 1;
+};
+
 int main(int argc, char** argv)
 {
-	lights.push_back(light(25.0f, 50.0f, 0.0f, 1e+3f * 5.6f, 1e+3f * 5.6f, 1e+3f * 5.6f, 50.0f));
+	if (argc != 2)
+	{
+		std::cout << "Usage: " << argv[0] << " <scene>" << std::endl;
 
-	shapes.push_back(new plane(0.0f, 0.0f - 24.0f, 0.0f, 0.0f, 0.0f + 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.000f, 0.0f, 0.0f, 2048.0f));
-	shapes.push_back(new plane(0.0f, 0.0f + 64.0f, 0.0f, 0.0f, 0.0f - 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.000f, 0.0f, 0.0f, 2048.0f));
-
-	shape_type exhibit = st_cylinder;
-
-	if (exhibit == shape_type::st_sphere)
-	{
-		shapes.push_back(new sphere(0.0f - 32.0f * 1.0f, -8.0f, -56.0f, 1.000f, 0.000f, 0.000f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-		shapes.push_back(new sphere(0.0f + 32.0f * 0.0f, -8.0f, -56.0f, 0.000f, 1.000f, 0.000f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-		shapes.push_back(new sphere(0.0f + 32.0f * 1.0f, -8.0f, -56.0f, 0.000f, 0.000f, 1.000f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-	}
-	else if (exhibit == shape_type::st_ellipsoid)
-	{
-		shapes.push_back(new ellipsoid(0.0f - 32.0f * 1.0f, -8.0f, -56.0f, 1.000f, 0.000f, 0.000f, 16.0f, 24.0f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-		shapes.push_back(new ellipsoid(0.0f + 32.0f * 0.0f, -8.0f, -56.0f, 0.000f, 1.000f, 0.000f, 16.0f, 24.0f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-		shapes.push_back(new ellipsoid(0.0f + 32.0f * 1.0f, -8.0f, -56.0f, 0.000f, 0.000f, 1.000f, 16.0f, 24.0f, 16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-	}
-	else if (exhibit == shape_type::st_cone)
-	{
-		shapes.push_back(new cone(0.0f - 32.0f * 1.0f, -24.0f, -56.0f, 0.0f - 32.0f * 1.0f, 16.0f, -56.0f, 1.000f, 0.000f, 0.000f, 16.0f, -16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-		shapes.push_back(new cone(0.0f + 32.0f * 0.0f, -24.0f, -56.0f, 0.0f + 32.0f * 0.0f, 16.0f, -56.0f, 0.000f, 1.000f, 0.000f, 16.0f, -16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-		shapes.push_back(new cone(0.0f + 32.0f * 1.0f, -24.0f, -56.0f, 0.0f + 32.0f * 1.0f, 16.0f, -56.0f, 0.000f, 0.000f, 1.000f, 16.0f, -16.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-	}
-	else if (exhibit == shape_type::st_capsule)
-	{
-		shapes.push_back(new capsule(0.0f - 32.0f * 1.0f, -24.0f, -56.0f, 0.0f - 32.0f * 1.0f, 16.0f, -56.0f, 1.000f, 0.000f, 0.000f, 15.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-		shapes.push_back(new capsule(0.0f + 32.0f * 0.0f, -24.0f, -56.0f, 0.0f + 32.0f * 0.0f, 16.0f, -56.0f, 0.000f, 1.000f, 0.000f, 15.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-		shapes.push_back(new capsule(0.0f + 32.0f * 1.0f, -24.0f, -56.0f, 0.0f + 32.0f * 1.0f, 16.0f, -56.0f, 0.000f, 0.000f, 1.000f, 15.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-	}
-	else if (exhibit == shape_type::st_cylinder)
-	{
-		shapes.push_back(new cylinder(0.0f - 32.0f * 1.0f, -24.0f, -56.0f, 0.0f - 32.0f * 1.0f, 16.0f, -56.0f, 1.000f, 0.000f, 0.000f, 15.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-		shapes.push_back(new cylinder(0.0f + 32.0f * 0.0f, -24.0f, -56.0f, 0.0f + 32.0f * 0.0f, 16.0f, -56.0f, 0.000f, 1.000f, 0.000f, 15.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
-		shapes.push_back(new cylinder(0.0f + 32.0f * 1.0f, -24.0f, -56.0f, 0.0f + 32.0f * 1.0f, 16.0f, -56.0f, 0.000f, 0.000f, 1.000f, 15.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+		exit(EXIT_FAILURE);
 	}
 
-	int supersample = 3;
+	if (ini_parse(argv[1], &ini_parser, NULL) < 0)
+	{
+		nuke("Could not load scene (ini_parse).");
+	}
 
-	int x_res = (128 * 8) * supersample;
-	int y_res = (128 * 8) * supersample;
+	for (auto section: ini_file)
+	{
+		if (section.first != "export" && section.first != "camera")
+		{
+			std::string type = inis(section.first, "type");
+
+			if (type == "sphere")
+			{
+				shapes.push_back
+				(
+					new sphere
+					(
+						inif(section.first, "x"),
+						inif(section.first, "y"),
+						inif(section.first, "z"),
+
+						inif(section.first, "r"),
+						inif(section.first, "g"),
+						inif(section.first, "b"),
+
+						inif(section.first, "radius"),
+
+						inif(section.first, "material1"),
+						inif(section.first, "material2"),
+						inif(section.first, "material3"),
+						inif(section.first, "material4")
+					)
+				);
+			}
+			else if (type == "ellipsoid")
+			{
+				shapes.push_back
+				(
+					new ellipsoid
+					(
+						inif(section.first, "x"),
+						inif(section.first, "y"),
+						inif(section.first, "z"),
+
+						inif(section.first, "r"),
+						inif(section.first, "g"),
+						inif(section.first, "b"),
+
+						inif(section.first, "radius_x"),
+						inif(section.first, "radius_y"),
+						inif(section.first, "radius_z"),
+
+						inif(section.first, "material1"),
+						inif(section.first, "material2"),
+						inif(section.first, "material3"),
+						inif(section.first, "material4")
+					)
+				);
+			}
+			else if (type == "cone")
+			{
+				shapes.push_back
+				(
+					new cone
+					(
+						inif(section.first, "a_x"),
+						inif(section.first, "a_y"),
+						inif(section.first, "a_z"),
+
+						inif(section.first, "b_x"),
+						inif(section.first, "b_y"),
+						inif(section.first, "b_z"),
+
+						inif(section.first, "r"),
+						inif(section.first, "g"),
+						inif(section.first, "b"),
+
+						inif(section.first, "radius_a"),
+						inif(section.first, "radius_b"),
+
+						inif(section.first, "material1"),
+						inif(section.first, "material2"),
+						inif(section.first, "material3"),
+						inif(section.first, "material4")
+					)
+				);
+			}
+			else if (type == "capsule")
+			{
+				shapes.push_back
+				(
+					new capsule
+					(
+						inif(section.first, "a_x"),
+						inif(section.first, "a_y"),
+						inif(section.first, "a_z"),
+
+						inif(section.first, "b_x"),
+						inif(section.first, "b_y"),
+						inif(section.first, "b_z"),
+
+						inif(section.first, "r"),
+						inif(section.first, "g"),
+						inif(section.first, "b"),
+
+						inif(section.first, "radius"),
+
+						inif(section.first, "material1"),
+						inif(section.first, "material2"),
+						inif(section.first, "material3"),
+						inif(section.first, "material4")
+					)
+				);
+			}
+			else if (type == "cylinder")
+			{
+				shapes.push_back
+				(
+					new cylinder
+					(
+						inif(section.first, "a_x"),
+						inif(section.first, "a_y"),
+						inif(section.first, "a_z"),
+
+						inif(section.first, "b_x"),
+						inif(section.first, "b_y"),
+						inif(section.first, "b_z"),
+
+						inif(section.first, "r"),
+						inif(section.first, "g"),
+						inif(section.first, "b"),
+
+						inif(section.first, "radius"),
+
+						inif(section.first, "material1"),
+						inif(section.first, "material2"),
+						inif(section.first, "material3"),
+						inif(section.first, "material4")
+					)
+				);
+			}
+			else if (type == "plane")
+			{
+				shapes.push_back
+				(
+					new plane
+					(
+						inif(section.first, "x"),
+						inif(section.first, "y"),
+						inif(section.first, "z"),
+
+						inif(section.first, "norm_x"),
+						inif(section.first, "norm_y"),
+						inif(section.first, "norm_z"),
+
+						inif(section.first, "r"),
+						inif(section.first, "g"),
+						inif(section.first, "b"),
+
+						inif(section.first, "material1"),
+						inif(section.first, "material2"),
+						inif(section.first, "material3"),
+						inif(section.first, "material4")
+					)
+				);
+			}
+			else if (type == "light")
+			{
+				lights.push_back
+				(
+					light
+					(
+						inif(section.first, "x"),
+						inif(section.first, "y"),
+						inif(section.first, "z"),
+
+						inif(section.first, "r"),
+						inif(section.first, "g"),
+						inif(section.first, "b"),
+
+						inif(section.first, "radius")
+					)
+				);
+			}
+		}
+	}
+
+	int supersample = inii("export", "supersample");
+
+	int x_res = inii("export", "x_res") * supersample;
+	int y_res = inii("export", "y_res") * supersample;
+
+	float ray_ox = inif("camera", "ray_ox");
+	float ray_oy = inif("camera", "ray_oy");
+	float ray_oz = inif("camera", "ray_oz");
+
+	float fov = inif("camera", "fov");
 
 	float x_resf = x_res;
 	float y_resf = y_res;
-
-	float fov = 90.0f;
 
 	float aspect =
 	(
@@ -2027,10 +2214,6 @@ int main(int argc, char** argv)
 			unsigned char* pixel = frame_buffer + (j * x_res + i) * 3;
 
 			// Generate prime ray.
-
-			float ray_ox = 0.0f;
-			float ray_oy = 0.0f;
-			float ray_oz = 0.0f;
 
 			float ray_dx = (0.0f + (float(i + 0.5f) / x_resf) * 2.0f - 1.0f) * fov_adjust;
 			float ray_dy = (1.0f - (float(j + 0.5f) / y_resf) * 2.0f + 0.0f) * fov_adjust;
