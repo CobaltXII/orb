@@ -4,7 +4,7 @@
 
 ## Summary
 
-Orb started out as a weekend raytracing project, but got a little bigger. It currently supports diffuse lighting, specular lighting, recursion, reflection, refraction, procedural environments, procedural texturing, supersampling, and gamma correction. Orb was originally named Orb because it could only raytrace spheres, but it can now raytrace ellipsoids, planes, capsules and cones as well.
+Orb started out as a weekend raytracing project, but got a little bigger. It currently supports diffuse lighting, specular lighting, recursion, reflection, refraction, procedural environments, procedural texturing, supersampling, and gamma correction. Orb was originally named Orb because it could only raytrace spheres, but it can now raytrace ellipsoids, planes, capsules, cylinders and cones as well.
 
 ## Libraries
 
