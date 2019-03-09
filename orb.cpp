@@ -35,7 +35,7 @@ inline void set_ptr(T* __ptr, T __value)
 
 enum shape_type
 {
-	st_sphere, st_plane, st_ellipsoid, st_cone, st_capsule
+	st_sphere, st_plane, st_ellipsoid, st_cone, st_capsule, st_cylinder
 };
 
 struct shape
@@ -283,6 +283,68 @@ struct capsule: shape
 inline capsule TO_CAPSULE(shape* __victim)
 {
 	return *((capsule*)__victim);
+}
+
+struct cylinder: shape
+{
+	float a_x;
+	float a_y;
+	float a_z;
+
+	float b_x;
+	float b_y;
+	float b_z;
+
+	float radius;
+
+	cylinder
+	(
+		float a_x,
+		float a_y,
+		float a_z,
+
+		float b_x,
+		float b_y,
+		float b_z,
+
+		float r,
+		float g,
+		float b,
+
+		float radius,
+
+		float material1 = 0.0f,
+		float material2 = 0.0f,
+		float material3 = 0.0f,
+		float material4 = 0.0f
+	)
+	{
+		this->primitive = shape_type::st_cylinder;
+
+		this->a_x = a_x;
+		this->a_y = a_y;
+		this->a_z = a_z;
+
+		this->b_x = b_x;
+		this->b_y = b_y;
+		this->b_z = b_z;
+
+		this->r = r;
+		this->g = g;
+		this->b = b;
+
+		this->radius = radius;
+
+		this->material1 = material1;
+		this->material2 = material2;
+		this->material3 = material3;
+		this->material4 = material4;
+	}
+};
+
+inline cylinder TO_CYLINDER(shape* __victim)
+{
+	return *((cylinder*)__victim);
 }
 
 struct plane: shape
@@ -1212,6 +1274,150 @@ float cast
 				}
 			}
 		}
+		else if (shape1->primitive == shape_type::st_cylinder)
+		{
+			cylinder cylinder1 = TO_CYLINDER(shape1);
+
+			float ca_x = cylinder1.b_x - cylinder1.a_x;
+			float ca_y = cylinder1.b_y - cylinder1.a_y;
+			float ca_z = cylinder1.b_z - cylinder1.a_z;
+
+			float oc_x = ray_ox - cylinder1.a_x;
+			float oc_y = ray_oy - cylinder1.a_y;
+			float oc_z = ray_oz - cylinder1.a_z;
+
+			float caca =
+			(
+				ca_x * ca_x +
+				ca_y * ca_y +
+				ca_z * ca_z
+			);
+
+			float card =
+			(
+				ca_x * ray_dx +
+				ca_y * ray_dy +
+				ca_z * ray_dz
+			);
+
+			float caoc =
+			(
+				ca_x * oc_x +
+				ca_y * oc_y +
+				ca_z * oc_z
+			);
+
+			float a = caca - card * card;
+
+			float ocrd =
+			(
+				oc_x * ray_dx +
+				oc_y * ray_dy +
+				oc_z * ray_dz
+			);
+
+			float b = caca * ocrd - caoc * card;
+
+			float ococ =
+			(
+				oc_x * oc_x +
+				oc_y * oc_y +
+				oc_z * oc_z
+			);
+
+			float c =
+			(
+				caca * ococ -
+				caoc * caoc -
+
+				cylinder1.radius *
+				cylinder1.radius
+
+				* caca
+			);
+    
+			float h = b * b - a * c;
+
+			if (h < 0.0f)
+			{
+				continue;
+			}
+
+			h = sqrtf(h);
+
+			float t = (-b - h) / a;
+
+			float y = caoc + t * card;
+
+			if (y > 0.0f && y < caca)
+			{
+				if (t < 0.0f)
+				{
+					continue;
+				}
+
+				if (t < min_dist)
+				{
+					min_dist = t;
+
+					set_ptr(hit_shape_material1, cylinder1.material1);
+					set_ptr(hit_shape_material2, cylinder1.material2);
+					set_ptr(hit_shape_material3, cylinder1.material3);
+					set_ptr(hit_shape_material4, cylinder1.material4);
+
+					set_ptr(hit_shape_r, cylinder1.r);
+					set_ptr(hit_shape_g, cylinder1.g);
+					set_ptr(hit_shape_b, cylinder1.b);
+
+					set_ptr(hit_shape, shape1);
+
+					// Surface normal.
+
+					set_ptr(norm_x, (oc_x + t * ray_dx - ca_x * y / caca) / cylinder1.radius);
+					set_ptr(norm_y, (oc_y + t * ray_dy - ca_y * y / caca) / cylinder1.radius);
+					set_ptr(norm_z, (oc_z + t * ray_dz - ca_z * y / caca) / cylinder1.radius);
+				}
+			}
+
+			if (y < 0.0f)
+			{
+				t = -caoc / card;
+			}
+			else
+			{
+				t = (caca - caoc) / card;
+			}
+
+			if (fabsf(b + a * t) < h)
+			{
+				if (t < 0.0f)
+				{
+					continue;
+				}
+
+				if (t < min_dist)
+				{
+					min_dist = t;
+
+					set_ptr(hit_shape_material1, cylinder1.material1);
+					set_ptr(hit_shape_material2, cylinder1.material2);
+					set_ptr(hit_shape_material3, cylinder1.material3);
+					set_ptr(hit_shape_material4, cylinder1.material4);
+
+					set_ptr(hit_shape_r, cylinder1.r);
+					set_ptr(hit_shape_g, cylinder1.g);
+					set_ptr(hit_shape_b, cylinder1.b);
+
+					set_ptr(hit_shape, shape1);
+
+					// Surface normal.
+
+					set_ptr(norm_x, ca_x * sign(y) / caca);
+					set_ptr(norm_y, ca_y * sign(y) / caca);
+					set_ptr(norm_z, ca_z * sign(y) / caca);
+				}
+			}
+		}
 	}
 
 	return min_dist;
@@ -1739,11 +1945,11 @@ void trace
 int main(int argc, char** argv)
 {
 	lights.push_back(light(25.0f, 50.0f, 0.0f, 1e+3f * 5.6f, 1e+3f * 5.6f, 1e+3f * 5.6f, 50.0f));
-	
+
 	shapes.push_back(new plane(0.0f, 0.0f - 24.0f, 0.0f, 0.0f, 0.0f + 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.000f, 0.0f, 0.0f, 2048.0f));
 	shapes.push_back(new plane(0.0f, 0.0f + 64.0f, 0.0f, 0.0f, 0.0f - 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.000f, 0.0f, 0.0f, 2048.0f));
 
-	shape_type exhibit = st_capsule;
+	shape_type exhibit = st_cylinder;
 
 	if (exhibit == shape_type::st_sphere)
 	{
@@ -1768,6 +1974,12 @@ int main(int argc, char** argv)
 		shapes.push_back(new capsule(0.0f - 32.0f * 1.0f, -24.0f, -56.0f, 0.0f - 32.0f * 1.0f, 16.0f, -56.0f, 1.000f, 0.000f, 0.000f, 15.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
 		shapes.push_back(new capsule(0.0f + 32.0f * 0.0f, -24.0f, -56.0f, 0.0f + 32.0f * 0.0f, 16.0f, -56.0f, 0.000f, 1.000f, 0.000f, 15.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
 		shapes.push_back(new capsule(0.0f + 32.0f * 1.0f, -24.0f, -56.0f, 0.0f + 32.0f * 1.0f, 16.0f, -56.0f, 0.000f, 0.000f, 1.000f, 15.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+	}
+	else if (exhibit == shape_type::st_cylinder)
+	{
+		shapes.push_back(new cylinder(0.0f - 32.0f * 1.0f, -24.0f, -56.0f, 0.0f - 32.0f * 1.0f, 16.0f, -56.0f, 1.000f, 0.000f, 0.000f, 15.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+		shapes.push_back(new cylinder(0.0f + 32.0f * 0.0f, -24.0f, -56.0f, 0.0f + 32.0f * 0.0f, 16.0f, -56.0f, 0.000f, 1.000f, 0.000f, 15.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
+		shapes.push_back(new cylinder(0.0f + 32.0f * 1.0f, -24.0f, -56.0f, 0.0f + 32.0f * 1.0f, 16.0f, -56.0f, 0.000f, 0.000f, 1.000f, 15.0f, 0.200f, 0.0f, 0.0f, 2048.0f));
 	}
 
 	int supersample = 3;
