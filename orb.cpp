@@ -11,6 +11,8 @@
 
 #include "inih/ini.h"
 
+#include "tinyobjloader/tiny_obj_loader.h"
+
 #define sign(x) ((x > 0.0f) - (x < 0.0f))
 
 #define fmin(a, b) ((a) < (b) ? (a) : (b))

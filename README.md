@@ -36,6 +36,14 @@ I also use Ben Hoyt's INI parsing library for loading portable scene files. The 
 clang -c inih/ini.c -o inih/ini.o -Ofast
 ```
 
+I also use Syoyo Fujita's Wavefront OBJ parsing library for loading portable model files. The library adds a large delay to compilation time, so I compile it once and then link it. To compile it, use the following command.
+
+### tinyobjloader
+
+```bash
+clang -c tinyobjloader/tiny_obj_loader.cc -o tinyobjloader/tiny_obj_loader.o -Ofast
+```
+
 ## Compiling
 
 Just link the libraries and compile as default. I was too lazy to write a Makefile.
