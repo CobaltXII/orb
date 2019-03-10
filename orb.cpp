@@ -2475,6 +2475,35 @@ int main(int argc, char** argv)
 					)
 				);
 			}
+			else if (type == "triangle")
+			{
+				shapes.push_back
+				(
+					new triangle
+					(
+						inif(section.first, "x0"),
+						inif(section.first, "y0"),
+						inif(section.first, "z0"),
+
+						inif(section.first, "x1"),
+						inif(section.first, "y1"),
+						inif(section.first, "z1"),
+
+						inif(section.first, "x2"),
+						inif(section.first, "y2"),
+						inif(section.first, "z2"),
+
+						inif(section.first, "r"),
+						inif(section.first, "g"),
+						inif(section.first, "b"),
+
+						inif(section.first, "material1"),
+						inif(section.first, "material2"),
+						inif(section.first, "material3"),
+						inif(section.first, "material4")
+					)
+				);
+			}
 			else if (type == "light")
 			{
 				lights.push_back
