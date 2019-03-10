@@ -602,6 +602,87 @@ struct light
 
 std::vector<light> lights;
 
+float signed_distance_field
+(
+	float x,
+	float y,
+	float z
+)
+{
+	float distance = std::numeric_limits<float>::max();
+
+	for (int i = 0; i < shapes.size(); i++)
+	{
+		shape* shape1 = shapes[i];
+
+		// Use the appropriate signed distance function.
+
+		if (shape1->primitive == shape_type::st_sphere)
+		{
+			sphere sphere1 = TO_SPHERE(shape1);
+
+			float p_x = x - sphere1.x;
+			float p_y = y - sphere1.y;
+			float p_z = z - sphere1.z;
+
+			float p_length = sqrtf
+			(
+				p_x * p_x +
+				p_y * p_y +
+				p_z * p_z
+			);
+
+			distance = fmin(p_length - sphere1.radius, distance);
+		}
+		else if (shape1->primitive == shape_type::st_plane)
+		{
+			plane plane1 = TO_PLANE(shape1);
+		}
+		else if (shape1->primitive == shape_type::st_ellipsoid)
+		{
+			ellipsoid ellipsoid1 = TO_ELLIPSOID(shape1);
+
+			float k0_x = (x - ellipsoid1.x) / ellipsoid1.radius_x;
+			float k0_y = (y - ellipsoid1.y) / ellipsoid1.radius_y;
+			float k0_z = (z - ellipsoid1.z) / ellipsoid1.radius_z;
+
+			float k1_x = (x - ellipsoid1.x) / (ellipsoid1.radius_x * ellipsoid1.radius_x);
+			float k1_y = (y - ellipsoid1.y) / (ellipsoid1.radius_y * ellipsoid1.radius_y);
+			float k1_z = (z - ellipsoid1.z) / (ellipsoid1.radius_z * ellipsoid1.radius_z);
+
+			float k0 = sqrtf
+			(
+				k0_x * k0_x +
+				k0_y * k0_y +
+				k0_z * k0_z
+			);
+
+			float k1 = sqrtf
+			(
+				k1_x * k1_x +
+				k1_y * k1_y +
+				k1_z * k1_z
+			);
+
+			distance = fmin(k0 * (k0 - 1.0f) / k1, distance);
+		}
+		else if (shape1->primitive == shape_type::st_cone)
+		{
+			cone cone1 = TO_CONE(shape1);
+		}
+		else if (shape1->primitive == shape_type::st_capsule)
+		{
+			capsule capsule1 = TO_CAPSULE(shape1);
+		}
+		else if (shape1->primitive == shape_type::st_cylinder)
+		{
+			cylinder cylinder1 = TO_CYLINDER(shape1);
+		}
+	}
+
+	return distance;
+}
+
 float cast
 (
 	float ray_ox,
@@ -1431,6 +1512,71 @@ float cast
 	return min_dist;
 }
 
+float shadow_ray
+(
+	float light_distance,
+
+	float ray_ox,
+	float ray_oy,
+	float ray_oz,
+
+	float ray_dx,
+	float ray_dy,
+	float ray_dz,
+
+	float light_radius
+)
+{
+	#ifdef RAYMARCHED_SHADOWS
+
+	float res = 1.0f;
+
+	for (float t = 0.0f; t < light_distance; t += 0.0f)
+	{
+		float h = signed_distance_field
+		(
+			ray_ox + t * ray_dx,
+			ray_oy + t * ray_dy,
+			ray_oz + t * ray_dz
+		);
+
+		if (h < 1e-2f)
+		{
+			return 0.025f;
+		}
+
+		res = fmin(res, (128.0f / light_radius) * h / t);
+
+		t += h;
+	}
+
+	return fmax(0.025f, res);
+
+	#else
+
+	float dist = cast
+	(
+		ray_ox,
+		ray_oy,
+		ray_oz,
+
+		ray_dx,
+		ray_dy,
+		ray_dz
+	);
+
+	if (dist < light_distance)
+	{
+		return 0.025f;
+	}
+	else
+	{
+		return 1.0f;
+	}
+
+	#endif
+}
+
 void trace
 (
 	float ray_ox,
@@ -1673,29 +1819,20 @@ void trace
 
 		// Send shadow ray.
 
-		float shadow_dist = cast
+		float shadow = shadow_ray
 		(
+			dr,
+
 			hit_x + 1e-1f * dtl_x,
 			hit_y + 1e-1f * dtl_y,
 			hit_z + 1e-1f * dtl_z,
 
 			dtl_x,
 			dtl_y,
-			dtl_z
+			dtl_z,
+
+			light1.radius
 		);
-
-		if (shadow_dist < dr)
-		{
-			#ifdef VERY_HARD_SHADOWS
-
-			return;
-
-			#else
-
-			continue;
-
-			#endif
-		}
 
 		// Diffuse.
 
@@ -1708,9 +1845,9 @@ void trace
 
 		l_pow /= dr * dr;
 
-		out_r += fmax(0.0f, hit_shape_r * light1.r * l_pow);
-		out_g += fmax(0.0f, hit_shape_g * light1.g * l_pow);
-		out_b += fmax(0.0f, hit_shape_b * light1.b * l_pow);
+		out_r += fmax(0.0f, hit_shape_r * light1.r * l_pow * shadow);
+		out_g += fmax(0.0f, hit_shape_g * light1.g * l_pow * shadow);
+		out_b += fmax(0.0f, hit_shape_b * light1.b * l_pow * shadow);
 
 		// Specular.
 
@@ -1751,9 +1888,9 @@ void trace
 
 		float specular_coefficient = powf(fmax(dot_view_specular, 0.0f), hit_shape_material4);
 
-		out_r += fmax(0.0f, light1.r * specular_coefficient * specular_constant);
-		out_g += fmax(0.0f, light1.g * specular_coefficient * specular_constant);
-		out_b += fmax(0.0f, light1.b * specular_coefficient * specular_constant);
+		out_r += fmax(0.0f, light1.r * specular_coefficient * specular_constant * shadow);
+		out_g += fmax(0.0f, light1.g * specular_coefficient * specular_constant * shadow);
+		out_b += fmax(0.0f, light1.b * specular_coefficient * specular_constant * shadow);
 	}
 
 	// Prevent infinite recursion.
