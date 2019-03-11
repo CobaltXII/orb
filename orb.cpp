@@ -38,499 +38,6 @@ inline void set_ptr(T* __ptr, T __value)
 	}
 }
 
-enum shape_type
-{
-	st_sphere, st_plane, st_ellipsoid, st_cone, st_capsule, st_cylinder, st_triangle
-};
-
-struct shape
-{
-	float material1;
-	float material2;
-	float material3;
-	float material4;
-	float material5;
-
-	float r;
-	float g;
-	float b;
-
-	shape_type primitive;
-};
-
-struct sphere: shape
-{
-	float x;
-	float y;
-	float z;
-
-	float radius;
-
-	sphere
-	(
-		float x,
-		float y,
-		float z,
-
-		float r,
-		float g,
-		float b,
-
-		float radius,
-
-		float material1 = 0.0f,
-		float material2 = 0.0f,
-		float material3 = 0.0f,
-		float material4 = 0.0f,
-		float material5 = 0.0f
-	)
-	{
-		this->primitive = shape_type::st_sphere;
-
-		this->x = x;
-		this->y = y;
-		this->z = z;
-
-		this->r = r;
-		this->g = g;
-		this->b = b;
-
-		this->radius = radius;
-
-		this->material1 = material1;
-		this->material2 = material2;
-		this->material3 = material3;
-		this->material4 = material4;
-		this->material5 = material5;
-	}
-};
-
-inline sphere TO_SPHERE(shape* __victim)
-{
-	return *((sphere*)__victim);
-}
-
-struct ellipsoid: shape
-{
-	float x;
-	float y;
-	float z;
-
-	float radius_x;
-	float radius_y;
-	float radius_z;
-
-	ellipsoid
-	(
-		float x,
-		float y,
-		float z,
-
-		float r,
-		float g,
-		float b,
-
-		float radius_x,
-		float radius_y,
-		float radius_z,
-
-		float material1 = 0.0f,
-		float material2 = 0.0f,
-		float material3 = 0.0f,
-		float material4 = 0.0f,
-		float material5 = 0.0f
-	)
-	{
-		this->primitive = shape_type::st_ellipsoid;
-
-		this->x = x;
-		this->y = y;
-		this->z = z;
-
-		this->r = r;
-		this->g = g;
-		this->b = b;
-
-		this->radius_x = radius_x;
-		this->radius_y = radius_y;
-		this->radius_z = radius_z;
-
-		this->material1 = material1;
-		this->material2 = material2;
-		this->material3 = material3;
-		this->material4 = material4;
-		this->material5 = material5;
-	}
-};
-
-inline ellipsoid TO_ELLIPSOID(shape* __victim)
-{
-	return *((ellipsoid*)__victim);
-}
-
-struct cone: shape
-{
-	float a_x;
-	float a_y;
-	float a_z;
-
-	float b_x;
-	float b_y;
-	float b_z;
-
-	float radius_a;
-	float radius_b;
-
-	cone
-	(
-		float a_x,
-		float a_y,
-		float a_z,
-
-		float b_x,
-		float b_y,
-		float b_z,
-
-		float r,
-		float g,
-		float b,
-
-		float radius_a,
-		float radius_b,
-
-		float material1 = 0.0f,
-		float material2 = 0.0f,
-		float material3 = 0.0f,
-		float material4 = 0.0f,
-		float material5 = 0.0f
-	)
-	{
-		this->primitive = shape_type::st_cone;
-
-		this->a_x = a_x;
-		this->a_y = a_y;
-		this->a_z = a_z;
-
-		this->b_x = b_x;
-		this->b_y = b_y;
-		this->b_z = b_z;
-
-		this->r = r;
-		this->g = g;
-		this->b = b;
-
-		this->radius_a = radius_a;
-		this->radius_b = radius_b;
-
-		this->material1 = material1;
-		this->material2 = material2;
-		this->material3 = material3;
-		this->material4 = material4;
-		this->material5 = material5;
-	}
-};
-
-inline cone TO_CONE(shape* __victim)
-{
-	return *((cone*)__victim);
-}
-
-struct capsule: shape
-{
-	float a_x;
-	float a_y;
-	float a_z;
-
-	float b_x;
-	float b_y;
-	float b_z;
-
-	float radius;
-
-	capsule
-	(
-		float a_x,
-		float a_y,
-		float a_z,
-
-		float b_x,
-		float b_y,
-		float b_z,
-
-		float r,
-		float g,
-		float b,
-
-		float radius,
-
-		float material1 = 0.0f,
-		float material2 = 0.0f,
-		float material3 = 0.0f,
-		float material4 = 0.0f,
-		float material5 = 0.0f
-	)
-	{
-		this->primitive = shape_type::st_capsule;
-
-		this->a_x = a_x;
-		this->a_y = a_y;
-		this->a_z = a_z;
-
-		this->b_x = b_x;
-		this->b_y = b_y;
-		this->b_z = b_z;
-
-		this->r = r;
-		this->g = g;
-		this->b = b;
-
-		this->radius = radius;
-
-		this->material1 = material1;
-		this->material2 = material2;
-		this->material3 = material3;
-		this->material4 = material4;
-		this->material5 = material5;
-	}
-};
-
-inline capsule TO_CAPSULE(shape* __victim)
-{
-	return *((capsule*)__victim);
-}
-
-struct cylinder: shape
-{
-	float a_x;
-	float a_y;
-	float a_z;
-
-	float b_x;
-	float b_y;
-	float b_z;
-
-	float radius;
-
-	cylinder
-	(
-		float a_x,
-		float a_y,
-		float a_z,
-
-		float b_x,
-		float b_y,
-		float b_z,
-
-		float r,
-		float g,
-		float b,
-
-		float radius,
-
-		float material1 = 0.0f,
-		float material2 = 0.0f,
-		float material3 = 0.0f,
-		float material4 = 0.0f,
-		float material5 = 0.0f
-	)
-	{
-		this->primitive = shape_type::st_cylinder;
-
-		this->a_x = a_x;
-		this->a_y = a_y;
-		this->a_z = a_z;
-
-		this->b_x = b_x;
-		this->b_y = b_y;
-		this->b_z = b_z;
-
-		this->r = r;
-		this->g = g;
-		this->b = b;
-
-		this->radius = radius;
-
-		this->material1 = material1;
-		this->material2 = material2;
-		this->material3 = material3;
-		this->material4 = material4;
-		this->material5 = material5;
-	}
-};
-
-inline cylinder TO_CYLINDER(shape* __victim)
-{
-	return *((cylinder*)__victim);
-}
-
-struct triangle: shape
-{
-	float x0;
-	float y0;
-	float z0;
-
-	float x1;
-	float y1;
-	float z1;
-
-	float x2;
-	float y2;
-	float z2;
-
-	float norm_x;
-	float norm_y;
-	float norm_z;
-
-	triangle
-	(
-		float x0,
-		float y0,
-		float z0,
-
-		float x1,
-		float y1,
-		float z1,
-
-		float x2,
-		float y2,
-		float z2,
-
-		float r,
-		float g,
-		float b,
-
-		float material1 = 0.0f,
-		float material2 = 0.0f,
-		float material3 = 0.0f,
-		float material4 = 0.0f,
-		float material5 = 0.0f
-	)
-	{
-		this->primitive = shape_type::st_triangle;
-
-		this->x0 = x0;
-		this->y0 = y0;
-		this->z0 = z0;
-
-		this->x1 = x1;
-		this->y1 = y1;
-		this->z1 = z1;
-
-		this->x2 = x2;
-		this->y2 = y2;
-		this->z2 = z2;
-
-		this->r = r;
-		this->g = g;
-		this->b = b;
-
-		this->material1 = material1;
-		this->material2 = material2;
-		this->material3 = material3;
-		this->material4 = material4;
-		this->material5 = material5;
-
-		// Surface normal.
-
-		float v1v0_x = x1 - x0;
-		float v1v0_y = y1 - y0;
-		float v1v0_z = z1 - z0;
-
-		float v2v0_x = x2 - x0;
-		float v2v0_y = y2 - y0;
-		float v2v0_z = z2 - z0;
-
-		float cross_x = v1v0_y * v2v0_z - v2v0_y * v1v0_z;
-		float cross_y = v1v0_x * v2v0_z - v2v0_x * v1v0_z;
-		float cross_z = v1v0_x * v2v0_y - v2v0_x * v1v0_y;
-
-		float cross_len = sqrtf
-		(
-			cross_x * cross_x +
-			cross_y * cross_y +
-			cross_z * cross_z
-		);
-
-		norm_x = cross_x / cross_len;
-		norm_y = cross_y / cross_len;
-		norm_z = cross_z / cross_len;
-	}
-};
-
-inline triangle TO_TRIANGLE(shape* __victim)
-{
-	return *((triangle*)__victim);
-}
-
-struct plane: shape
-{
-	float x;
-	float y;
-	float z;
-
-	float norm_x;
-	float norm_y;
-	float norm_z;
-
-	plane
-	(
-		float x,
-		float y,
-		float z,
-
-		float norm_x,
-		float norm_y,
-		float norm_z,
-
-		float r,
-		float g,
-		float b,
-
-		float material1 = 0.0f,
-		float material2 = 0.0f,
-		float material3 = 0.0f,
-		float material4 = 0.0f,
-		float material5 = 0.0f
-	)
-	{
-		this->primitive = shape_type::st_plane;
-
-		this->x = x;
-		this->y = y;
-		this->z = z;
-
-		this->norm_x = norm_x;
-		this->norm_y = norm_y;
-		this->norm_z = norm_z;
-
-		float norm_length = sqrtf
-		(
-			this->norm_x * this->norm_x +
-			this->norm_y * this->norm_y +
-			this->norm_z * this->norm_z
-		);
-
-		this->norm_x /= norm_length;
-		this->norm_y /= norm_length;
-		this->norm_z /= norm_length;
-
-		this->r = r;
-		this->g = g;
-		this->b = b;
-
-		this->material1 = material1;
-		this->material2 = material2;
-		this->material3 = material3;
-		this->material4 = material4;
-		this->material5 = material5;
-	}
-};
-
-inline plane TO_PLANE(shape* __victim)
-{
-	return *((plane*)__victim);
-}
-
 inline float rand11()
 {
 	return float(rand()) / float(RAND_MAX) * 2.0f - 1.0f;
@@ -548,171 +55,19 @@ void nuke(std::string note)
 	exit(EXIT_FAILURE);
 }
 
-struct sampler
-{
-	int x_res;
-	int y_res;
+#include "hpp/shape.hpp"
 
-	unsigned char* data;
-
-	sampler(std::string path)
-	{
-		data = stbi_load(path.c_str(), &x_res, &y_res, NULL, 3);
-
-		if (!data)
-		{
-			nuke("Could not load image (stbi_load).");
-		}
-	}
-
-	inline void sample
-	(
-		float u, 
-		float v,
-
-		float& out_color_r,
-		float& out_color_g,
-		float& out_color_b
-	)
-	{
-		int x = fmin(fmax(0, u * x_res), x_res - 1);
-		int y = fmin(fmax(0, v * y_res), y_res - 1);
-
-		unsigned char* pixel = data + (y * x_res + x) * 3;
-
-		out_color_r = float(pixel[R]) / 255.0f;
-		out_color_g = float(pixel[G]) / 255.0f;
-		out_color_b = float(pixel[B]) / 255.0f;
-	}
-};
+#include "hpp/ellipsoid.hpp"
+#include "hpp/cylinder.hpp"
+#include "hpp/triangle.hpp"
+#include "hpp/capsule.hpp"
+#include "hpp/sphere.hpp"
+#include "hpp/plane.hpp"
+#include "hpp/cone.hpp"
 
 std::vector<shape*> shapes;
 
-inline void sphere_uv
-(
-	float intersection_x,
-	float intersection_y,
-	float intersection_z,
-
-	float sphere_center_x,
-	float sphere_center_y,
-	float sphere_center_z,
-
-	float sphere_radius,
-
-	float& out_u,
-	float& out_v
-)
-{
-	float hit_vec_x = intersection_x - sphere_center_x;
-	float hit_vec_y = intersection_y - sphere_center_y;
-	float hit_vec_z = intersection_z - sphere_center_z;
-
-	out_u = (1.0f + atan2f(hit_vec_z, hit_vec_x) / M_PI) * 0.5f;
-
-	out_v = acosf(hit_vec_y / sphere_radius) / M_PI;
-}
-
-inline void plane_uv
-(
-	float intersection_x,
-	float intersection_y,
-	float intersection_z,
-
-	float plane_origin_x,
-	float plane_origin_y,
-	float plane_origin_z,
-
-	float plane_normal_x,
-	float plane_normal_y,
-	float plane_normal_z,
-
-	float& out_u,
-	float& out_v
-)
-{
-	if (plane_normal_y == 0.0f)
-	{
-		plane_normal_y = plane_normal_z;
-	}
-
-	float x_axis_x = plane_normal_y * 1.0f - 0.0f * plane_normal_z;
-	float x_axis_y = plane_normal_x * 1.0f - 0.0f * plane_normal_z;
-	float x_axis_z = plane_normal_x * 0.0f - 0.0f * plane_normal_y;
-
-	float x_axis_length =
-	(
-		x_axis_x * x_axis_x +
-		x_axis_y * x_axis_y +
-		x_axis_z * x_axis_z
-	);
-
-	if (x_axis_length <= 0.0f)
-	{
-		x_axis_x = plane_normal_y * 0.0f - 0.0f * plane_normal_y;
-		x_axis_y = plane_normal_z * 0.0f - 0.0f * plane_normal_z;
-		x_axis_z = plane_normal_x * 1.0f - 1.0f * plane_normal_x;
-	}
-
-	float y_axis_x = plane_normal_y * x_axis_z - x_axis_y * plane_normal_z;
-	float y_axis_y = plane_normal_x * x_axis_z - x_axis_x * plane_normal_z;
-	float y_axis_z = plane_normal_x * x_axis_y - x_axis_x * plane_normal_y;
-
-	float hit_vec_x = intersection_x - plane_origin_x;
-	float hit_vec_y = intersection_y - plane_origin_y;
-	float hit_vec_z = intersection_z - plane_origin_z;
-
-	out_u =
-	(
-		hit_vec_x * x_axis_x +
-		hit_vec_y * x_axis_y +
-		hit_vec_z * x_axis_z
-	);
-
-	out_v =
-	(
-		hit_vec_x * y_axis_x +
-		hit_vec_y * y_axis_y +
-		hit_vec_z * y_axis_z
-	);
-}
-
-struct light
-{
-	float x;
-	float y;
-	float z;
-
-	float r;
-	float g;
-	float b;
-
-	float radius;
-
-	light
-	(
-		float x,
-		float y,
-		float z,
-
-		float r,
-		float g,
-		float b,
-
-		float radius
-	)
-	{
-		this->x = x;
-		this->y = y;
-		this->z = z;
-
-		this->r = r;
-		this->g = g;
-		this->b = b;
-
-		this->radius = radius;
-	}
-};
+#include "hpp/light.hpp"
 
 std::vector<light> lights;
 
@@ -797,6 +152,129 @@ float signed_distance_field
 	return distance;
 }
 
+float do_intersect
+(
+	float ray_ox,
+	float ray_oy,
+	float ray_oz,
+
+	float ray_dx,
+	float ray_dy,
+	float ray_dz,
+
+	float* norm_x,
+	float* norm_y,
+	float* norm_z,
+
+	float* texture_u,
+	float* texture_v,
+
+	shape* shape1
+)
+{
+	if (shape1->primitive == shape_type::st_sphere)
+	{
+		return sphere_intersect
+		(
+			TO_SPHERE(shape1),
+
+			ray_ox, ray_oy, ray_oz,
+			ray_dx, ray_dy, ray_dz,
+
+			norm_x,
+			norm_y,
+			norm_z
+		);
+	}
+	else if (shape1->primitive == shape_type::st_plane)
+	{
+		return plane_intersect
+		(
+			TO_PLANE(shape1),
+
+			ray_ox, ray_oy, ray_oz,
+			ray_dx, ray_dy, ray_dz,
+
+			norm_x,
+			norm_y,
+			norm_z
+		);
+	}
+	else if (shape1->primitive == shape_type::st_ellipsoid)
+	{
+		return ellipsoid_intersect
+		(
+			TO_ELLIPSOID(shape1),
+
+			ray_ox, ray_oy, ray_oz,
+			ray_dx, ray_dy, ray_dz,
+
+			norm_x,
+			norm_y,
+			norm_z
+		);
+	}
+	else if (shape1->primitive == shape_type::st_cone)
+	{
+		return cone_intersect
+		(
+			TO_CONE(shape1),
+
+			ray_ox, ray_oy, ray_oz,
+			ray_dx, ray_dy, ray_dz,
+
+			norm_x,
+			norm_y,
+			norm_z
+		);
+	}
+	else if (shape1->primitive == shape_type::st_capsule)
+	{
+		return capsule_intersect
+		(
+			TO_CAPSULE(shape1),
+
+			ray_ox, ray_oy, ray_oz,
+			ray_dx, ray_dy, ray_dz,
+
+			norm_x,
+			norm_y,
+			norm_z
+		);
+	}
+	else if (shape1->primitive == shape_type::st_cylinder)
+	{
+		return cylinder_intersect
+		(
+			TO_CYLINDER(shape1),
+
+			ray_ox, ray_oy, ray_oz,
+			ray_dx, ray_dy, ray_dz,
+
+			norm_x,
+			norm_y,
+			norm_z
+		);
+	}
+	else if (shape1->primitive == shape_type::st_triangle)
+	{
+		return triangle_intersect
+		(
+			TO_TRIANGLE(shape1),
+
+			ray_ox, ray_oy, ray_oz,
+			ray_dx, ray_dy, ray_dz,
+
+			norm_x,
+			norm_y,
+			norm_z,
+
+			texture_u,
+			texture_v
+		);
+	}
+}
+
 float cast
 (
 	float ray_ox,
@@ -827,920 +305,56 @@ float cast
 	shape** hit_shape = NULL
 )
 {
+	float temporary_norm_x;
+	float temporary_norm_y;
+	float temporary_norm_z;
+
+	float temporary_texture_u;
+	float temporary_texture_v;
+
 	float min_dist = std::numeric_limits<float>::max();
 
 	for (int i = 0; i < shapes.size(); i++)
 	{
 		shape* shape1 = shapes[i];
 
-		// Use the appropriate intersector.
+		float t = do_intersect
+		(
+			ray_ox, ray_oy, ray_oz,
+			ray_dx, ray_dy, ray_dz,
 
-		if (shape1->primitive == shape_type::st_sphere)
+			&temporary_norm_x,
+			&temporary_norm_y,
+			&temporary_norm_z,
+
+			&temporary_texture_u,
+			&temporary_texture_v,
+
+			shape1			
+		);
+
+		if (t > 0.0f && t < min_dist)
 		{
-			sphere sphere1 = TO_SPHERE(shape1);
+			min_dist = t;
 
-			float i_lx = sphere1.x - ray_ox;
-			float i_ly = sphere1.y - ray_oy;
-			float i_lz = sphere1.z - ray_oz;
+			set_ptr(hit_shape_material1, shape1->material1);
+			set_ptr(hit_shape_material2, shape1->material2);
+			set_ptr(hit_shape_material3, shape1->material3);
+			set_ptr(hit_shape_material4, shape1->material4);
+			set_ptr(hit_shape_material5, shape1->material5);
 
-			float i_adj2 =
-			(
-				i_lx * ray_dx +
-				i_ly * ray_dy +
-				i_lz * ray_dz
-			);
+			set_ptr(hit_shape_r, shape1->r);
+			set_ptr(hit_shape_g, shape1->g);
+			set_ptr(hit_shape_b, shape1->b);
 
-			float i_d2 =
-			(
-				i_lx * i_lx +
-				i_ly * i_ly +
-				i_lz * i_lz
-			);
+			set_ptr(hit_shape, shape1);
 
-			i_d2 -= i_adj2 * i_adj2;
+			set_ptr(norm_x, temporary_norm_x);
+			set_ptr(norm_y, temporary_norm_y);
+			set_ptr(norm_z, temporary_norm_z);
 
-			float i_r2 =
-			(
-				sphere1.radius *
-				sphere1.radius
-			);
-
-			if (i_d2 > i_r2)
-			{
-				continue;
-			}
-
-			float i_thc = sqrtf(i_r2 - i_d2);
-
-			float i_t0 = i_adj2 - i_thc;
-			float i_t1 = i_adj2 + i_thc;
-
-			if (i_t0 < 0.0f && i_t1 < 0.0f)
-			{
-				continue;
-			}
-
-			float i_d = std::numeric_limits<float>::max();
-
-			if (i_t0 < 0.0f)
-			{
-				i_d = i_t1;
-			}
-			else if (i_t1 < 0.0f)
-			{
-				i_d = i_t0;
-			}
-			else
-			{
-				i_d = fmin(i_t0, i_t1);
-			}
-
-			if (i_d < min_dist)
-			{
-				min_dist = i_d;
-
-				set_ptr(hit_shape_material1, sphere1.material1);
-				set_ptr(hit_shape_material2, sphere1.material2);
-				set_ptr(hit_shape_material3, sphere1.material3);
-				set_ptr(hit_shape_material4, sphere1.material4);
-				set_ptr(hit_shape_material5, sphere1.material5);
-
-				set_ptr(hit_shape_r, sphere1.r);
-				set_ptr(hit_shape_g, sphere1.g);
-				set_ptr(hit_shape_b, sphere1.b);
-
-				set_ptr(hit_shape, shape1);
-
-				// Surface normal.
-
-				set_ptr(norm_x, (ray_ox + ray_dx * i_d) - sphere1.x);
-				set_ptr(norm_y, (ray_oy + ray_dy * i_d) - sphere1.y);
-				set_ptr(norm_z, (ray_oz + ray_dz * i_d) - sphere1.z);
-			}
-		}
-		else if (shape1->primitive == shape_type::st_plane)
-		{
-			plane plane1 = TO_PLANE(shape1);
-
-			float denom =
-			(
-				-plane1.norm_x * ray_dx +
-				-plane1.norm_y * ray_dy +
-				-plane1.norm_z * ray_dz
-			);
-
-			if (denom > 1e-6f)
-			{
-				float v_x = plane1.x - ray_ox;
-				float v_y = plane1.y - ray_oy;
-				float v_z = plane1.z - ray_oz;
-
-				float distance =
-				(
-					v_x * -plane1.norm_x +
-					v_y * -plane1.norm_y +
-					v_z * -plane1.norm_z
-				);
-
-				if (distance >= 0.0f)
-				{
-					float i_d = distance / denom;
-					
-					if (i_d < min_dist)
-					{
-						min_dist = i_d;
-
-						set_ptr(hit_shape_material1, plane1.material1);
-						set_ptr(hit_shape_material2, plane1.material2);
-						set_ptr(hit_shape_material3, plane1.material3);
-						set_ptr(hit_shape_material4, plane1.material4);
-						set_ptr(hit_shape_material5, plane1.material5);
-
-						set_ptr(hit_shape_r, plane1.r);
-						set_ptr(hit_shape_g, plane1.g);
-						set_ptr(hit_shape_b, plane1.b);
-
-						set_ptr(hit_shape, shape1);
-
-						// Surface normal.
-
-						set_ptr(norm_x, plane1.norm_x);
-						set_ptr(norm_y, plane1.norm_y);
-						set_ptr(norm_z, plane1.norm_z);
-					}
-				}
-			}
-		}
-		else if (shape1->primitive == shape_type::st_ellipsoid)
-		{
-			ellipsoid ellipsoid1 = TO_ELLIPSOID(shape1);
-
-			float oc_x = ray_ox - ellipsoid1.x;
-			float oc_y = ray_oy - ellipsoid1.y;
-			float oc_z = ray_oz - ellipsoid1.z;
-
-			float a =
-			(
-				(ray_dx * ray_dx) / (ellipsoid1.radius_x * ellipsoid1.radius_x) +
-				(ray_dy * ray_dy) / (ellipsoid1.radius_y * ellipsoid1.radius_y) +
-				(ray_dz * ray_dz) / (ellipsoid1.radius_z * ellipsoid1.radius_z)
-			);
-
-			float b =
-			(
-				(2.0f * oc_x * ray_dx) / (ellipsoid1.radius_x * ellipsoid1.radius_x) +
-				(2.0f * oc_y * ray_dy) / (ellipsoid1.radius_y * ellipsoid1.radius_y) +
-				(2.0f * oc_z * ray_dz) / (ellipsoid1.radius_z * ellipsoid1.radius_z)
-			);
-
-			float c =
-			(
-				(oc_x * oc_x) / (ellipsoid1.radius_x * ellipsoid1.radius_x) +
-				(oc_y * oc_y) / (ellipsoid1.radius_y * ellipsoid1.radius_y) +
-				(oc_z * oc_z) / (ellipsoid1.radius_z * ellipsoid1.radius_z)
-
-				- 1.0f
-			);
-
-			float d = b * b - 4.0f * a * c;
-
-			if (d < 0.0f || a == 0.0f || b == 0.0f || c == 0.0f)
-			{
-				continue;
-			}
-
-			d = sqrtf(d);
-
-			float t1 = (-b + d) / (2.0f * a);
-			float t2 = (-b - d) / (2.0f * a);
-
-			float eps = 0.0f;
-
-			if (t1 <= eps && t2 <= eps)
-			{
-				continue;
-			}
-
-			float t = 0.0f;
-
-			if (t1 <= eps)
-			{
-				t = t2;
-			}
-			else
-			{
-				if (t2 <= eps)
-				{
-					t = t1;
-				}
-				else
-				{
-					if (t1 < t2)
-					{
-						t = t1;
-					}
-					else
-					{
-						t = t2;
-					}
-				}
-			}
-
-			if (t < eps)
-			{
-				continue;
-			}
-
-			float i_d = t;
-
-			if (i_d < min_dist)
-			{
-				min_dist = i_d;
-
-				set_ptr(hit_shape_material1, ellipsoid1.material1);
-				set_ptr(hit_shape_material2, ellipsoid1.material2);
-				set_ptr(hit_shape_material3, ellipsoid1.material3);
-				set_ptr(hit_shape_material4, ellipsoid1.material4);
-				set_ptr(hit_shape_material5, ellipsoid1.material5);
-
-				set_ptr(hit_shape_r, ellipsoid1.r);
-				set_ptr(hit_shape_g, ellipsoid1.g);
-				set_ptr(hit_shape_b, ellipsoid1.b);
-
-				set_ptr(hit_shape, shape1);
-
-				// Surface normal.
-
-				set_ptr(norm_x, ((ray_ox + ray_dx * i_d) - ellipsoid1.x) / ellipsoid1.radius_x);
-				set_ptr(norm_y, ((ray_oy + ray_dy * i_d) - ellipsoid1.y) / ellipsoid1.radius_y);
-				set_ptr(norm_z, ((ray_oz + ray_dz * i_d) - ellipsoid1.z) / ellipsoid1.radius_z);
-			}
-		}
-		else if (shape1->primitive == shape_type::st_cone)
-		{
-			cone cone1 = TO_CONE(shape1);
-
-			float ba_x = cone1.b_x - cone1.a_x;
-			float ba_y = cone1.b_y - cone1.a_y;
-			float ba_z = cone1.b_z - cone1.a_z;
-
-			float oa_x = ray_ox - cone1.a_x;
-			float oa_y = ray_oy - cone1.a_y;
-			float oa_z = ray_oz - cone1.a_z;
-
-			float ob_x = ray_ox - cone1.b_x;
-			float ob_y = ray_oy - cone1.b_y;
-			float ob_z = ray_oz - cone1.b_z;
-
-			float baba =
-			(
-				ba_x * ba_x +
-				ba_y * ba_y +
-				ba_z * ba_z
-			);
-
-			float rdba =
-			(
-				ray_dx * ba_x +
-				ray_dy * ba_y +
-				ray_dz * ba_z
-			);
-
-			float oaba =
-			(
-				oa_x * ba_x +
-				oa_y * ba_y +
-				oa_z * ba_z
-			);
-
-			float obba =
-			(
-				ob_x * ba_x +
-				ob_y * ba_y +
-				ob_z * ba_z
-			);
-    
-			if (oaba < 0.0f)
-			{
-				float c1_x = oa_x * rdba - ray_dx * oaba;
-				float c1_y = oa_y * rdba - ray_dy * oaba;
-				float c1_z = oa_z * rdba - ray_dz * oaba;
-
-				float c1 =
-				(
-					c1_x * c1_x +
-					c1_y * c1_y +
-					c1_z * c1_z
-				);
-
-				if (c1 < cone1.radius_a * cone1.radius_a * rdba * rdba)
-				{
-					float t = -oaba / rdba;
-
-					if (t < min_dist)
-					{
-						min_dist = t;
-
-						set_ptr(hit_shape_material1, cone1.material1);
-						set_ptr(hit_shape_material2, cone1.material2);
-						set_ptr(hit_shape_material3, cone1.material3);
-						set_ptr(hit_shape_material4, cone1.material4);
-						set_ptr(hit_shape_material5, cone1.material5);
-
-						set_ptr(hit_shape_r, cone1.r);
-						set_ptr(hit_shape_g, cone1.g);
-						set_ptr(hit_shape_b, cone1.b);
-
-						set_ptr(hit_shape, shape1);
-
-						// Surface normal.
-
-						float isqr_baba = 1.0f / sqrtf(baba);
-
-						set_ptr(norm_x, -ba_x * isqr_baba);
-						set_ptr(norm_y, -ba_y * isqr_baba);
-						set_ptr(norm_z, -ba_z * isqr_baba);
-					}
-				}
-			}
-			else if (obba > 0.0f)
-			{
-				float t = -obba / rdba;
-
-				float c1_x = ob_x + ray_dx * t;
-				float c1_y = ob_y + ray_dy * t;
-				float c1_z = ob_z + ray_dz * t;
-
-				float c1 =
-				(
-					c1_x * c1_x +
-					c1_y * c1_y +
-					c1_z * c1_z
-				);
-
-				if (c1 < cone1.radius_b * cone1.radius_b)
-				{
-					if (t < min_dist)
-					{
-						min_dist = t;
-
-						set_ptr(hit_shape_material1, cone1.material1);
-						set_ptr(hit_shape_material2, cone1.material2);
-						set_ptr(hit_shape_material3, cone1.material3);
-						set_ptr(hit_shape_material4, cone1.material4);
-						set_ptr(hit_shape_material5, cone1.material5);
-
-						set_ptr(hit_shape_r, cone1.r);
-						set_ptr(hit_shape_g, cone1.g);
-						set_ptr(hit_shape_b, cone1.b);
-
-						set_ptr(hit_shape, shape1);
-
-						// Surface normal.
-
-						float isqr_baba = 1.0f / sqrtf(baba);
-
-						set_ptr(norm_x, ba_x * isqr_baba);
-						set_ptr(norm_y, ba_y * isqr_baba);
-						set_ptr(norm_z, ba_z * isqr_baba);
-					}
-				}
-			}
-
-			float rbra = cone1.radius_b - cone1.radius_a;
-
-			float oc_x = oa_x * cone1.radius_b - ob_x * cone1.radius_a;
-			float oc_y = oa_y * cone1.radius_b - ob_y * cone1.radius_a;
-			float oc_z = oa_z * cone1.radius_b - ob_z * cone1.radius_a;
-
-			float hyhy = baba + rbra * rbra;
-
-			float ocba =
-			(
-				oc_x * ba_x +
-				oc_y * ba_y +
-				oc_z * ba_z
-			);
-
-			float ocrd =
-			(
-				oc_x * ray_dx +
-				oc_y * ray_dy +
-				oc_z * ray_dz
-			);
-
-			float ococ =
-			(
-				oc_x * oc_x +
-				oc_y * oc_y +
-				oc_z * oc_z
-			);
-
-			float k2 = baba * baba - hyhy * rdba * rdba;
-
-			float k1 = baba * baba * ocrd - hyhy * rdba * ocba;
-			float k0 = baba * baba * ococ - hyhy * ocba * ocba;
-
-			float h = k1 * k1 - k2 * k0;
-
-			if (h < 0.0f)
-			{
-				continue;
-			}
-
-			float t = (-k1 - sign(rbra) * sqrtf(h)) / (k2 * rbra);
-
-			if (t < 0.0f)
-			{
-				continue;
-			}
-
-			float y = oaba + t * rdba;
-
-			if (y > 0.0f && y < baba)
-			{
-				if (t < min_dist)
-				{
-					min_dist = t;
-
-					set_ptr(hit_shape_material1, cone1.material1);
-					set_ptr(hit_shape_material2, cone1.material2);
-					set_ptr(hit_shape_material3, cone1.material3);
-					set_ptr(hit_shape_material4, cone1.material4);
-					set_ptr(hit_shape_material5, cone1.material5);
-
-					set_ptr(hit_shape_r, cone1.r);
-					set_ptr(hit_shape_g, cone1.g);
-					set_ptr(hit_shape_b, cone1.b);
-
-					set_ptr(hit_shape, shape1);
-
-					// Surface normal.
-
-					float isqr_baba = 1.0f / sqrtf(baba);
-
-					set_ptr(norm_x, baba * (baba * (oa_x + t * ray_dx) - rbra * ba_x * cone1.radius_a) - ba_x * hyhy * y);
-					set_ptr(norm_y, baba * (baba * (oa_y + t * ray_dy) - rbra * ba_y * cone1.radius_a) - ba_y * hyhy * y);
-					set_ptr(norm_z, baba * (baba * (oa_z + t * ray_dz) - rbra * ba_z * cone1.radius_a) - ba_z * hyhy * y);
-				}
-			}
-		}
-		else if (shape1->primitive == shape_type::st_capsule)
-		{
-			capsule capsule1 = TO_CAPSULE(shape1);
-
-			float ba_x = capsule1.b_x - capsule1.a_x;
-			float ba_y = capsule1.b_y - capsule1.a_y;
-			float ba_z = capsule1.b_z - capsule1.a_z;
-
-			float oa_x = ray_ox - capsule1.a_x;
-			float oa_y = ray_oy - capsule1.a_y;
-			float oa_z = ray_oz - capsule1.a_z;
-
-			float baba =
-			(
-				ba_x * ba_x +
-				ba_y * ba_y +
-				ba_z * ba_z
-			);
-
-			float bard =
-			(
-				ba_x * ray_dx +
-				ba_y * ray_dy +
-				ba_z * ray_dz
-			);
-
-			float baoa =
-			(
-				ba_x * oa_x +
-				ba_y * oa_y +
-				ba_z * oa_z
-			);
-
-			float rdoa =
-			(
-				ray_dx * oa_x +
-				ray_dy * oa_y +
-				ray_dz * oa_z
-			);
-
-			float oaoa =
-			(
-				oa_x * oa_x +
-				oa_y * oa_y +
-				oa_z * oa_z
-			);
-
-			float a = baba - bard * bard;
-
-			float b = baba * rdoa - baoa * bard;
-
-			float c =
-			(
-				baba * oaoa -
-				baoa * baoa -
-
-				capsule1.radius *
-				capsule1.radius
-
-				* baba
-			);
-
-			float h = b * b - a * c;
-
-			if (h >= 0.0f)
-			{
-				float t = (-b - sqrtf(h)) / a;
-
-				float y = baoa + t * bard;
-
-				if (y > 0.0f && y < baba)
-				{
-					if (t < 0.0f)
-					{
-						continue;
-					}
-
-					if (t < min_dist)
-					{
-						min_dist = t;
-
-						set_ptr(hit_shape_material1, capsule1.material1);
-						set_ptr(hit_shape_material2, capsule1.material2);
-						set_ptr(hit_shape_material3, capsule1.material3);
-						set_ptr(hit_shape_material4, capsule1.material4);
-						set_ptr(hit_shape_material5, capsule1.material5);
-
-						set_ptr(hit_shape_r, capsule1.r);
-						set_ptr(hit_shape_g, capsule1.g);
-						set_ptr(hit_shape_b, capsule1.b);
-
-						set_ptr(hit_shape, shape1);
-
-						// Surface normal.
-
-						float hit_x = ray_ox + ray_dx * t;
-						float hit_y = ray_oy + ray_dy * t;
-						float hit_z = ray_oz + ray_dz * t;
-
-						float pa_x = hit_x - capsule1.a_x;
-						float pa_y = hit_y - capsule1.a_y;
-						float pa_z = hit_z - capsule1.a_z;
-
-						float paba =
-						(
-							pa_x * ba_x +
-							pa_y * ba_y +
-							pa_z * ba_z
-						);
-
-						float q = fmax(0.0f, fmin(1.0f, paba / baba));
-
-						set_ptr(norm_x, (pa_x - q * ba_x) / capsule1.radius);
-						set_ptr(norm_y, (pa_y - q * ba_y) / capsule1.radius);
-						set_ptr(norm_z, (pa_z - q * ba_z) / capsule1.radius);
-					}
-				}
-
-				float oc_x;
-				float oc_y;
-				float oc_z;
-
-				if (y <= 0.0f)
-				{
-					oc_x = oa_x;
-					oc_y = oa_y;
-					oc_z = oa_z;
-				}
-				else
-				{
-					oc_x = ray_ox - capsule1.b_x;
-					oc_y = ray_oy - capsule1.b_y;
-					oc_z = ray_oz - capsule1.b_z;
-				}
-
-				b =
-				(
-					ray_dx * oc_x +
-					ray_dy * oc_y +
-					ray_dz * oc_z
-				);
-
-				c =
-				(
-					oc_x * oc_x +
-					oc_y * oc_y +
-					oc_z * oc_z
-
-					- capsule1.radius * capsule1.radius
-				);
-
-				h = b * b - c;
-
-				if (h > 0.0f)
-				{
-					t = -b - sqrtf(h);
-
-					if (t < 0.0f)
-					{
-						continue;
-					}
-
-					if (t < min_dist)
-					{
-						min_dist = t;
-
-						set_ptr(hit_shape_material1, capsule1.material1);
-						set_ptr(hit_shape_material2, capsule1.material2);
-						set_ptr(hit_shape_material3, capsule1.material3);
-						set_ptr(hit_shape_material4, capsule1.material4);
-						set_ptr(hit_shape_material5, capsule1.material5);
-
-						set_ptr(hit_shape_r, capsule1.r);
-						set_ptr(hit_shape_g, capsule1.g);
-						set_ptr(hit_shape_b, capsule1.b);
-
-						set_ptr(hit_shape, shape1);
-
-						// Surface normal.
-
-						float hit_x = ray_ox + ray_dx * t;
-						float hit_y = ray_oy + ray_dy * t;
-						float hit_z = ray_oz + ray_dz * t;
-
-						float pa_x = hit_x - capsule1.a_x;
-						float pa_y = hit_y - capsule1.a_y;
-						float pa_z = hit_z - capsule1.a_z;
-
-						float paba =
-						(
-							pa_x * ba_x +
-							pa_y * ba_y +
-							pa_z * ba_z
-						);
-
-						float q = fmax(0.0f, fmin(1.0f, paba / baba));
-
-						set_ptr(norm_x, (pa_x - q * ba_x) / capsule1.radius);
-						set_ptr(norm_y, (pa_y - q * ba_y) / capsule1.radius);
-						set_ptr(norm_z, (pa_z - q * ba_z) / capsule1.radius);
-					}
-				}
-			}
-		}
-		else if (shape1->primitive == shape_type::st_cylinder)
-		{
-			cylinder cylinder1 = TO_CYLINDER(shape1);
-
-			float ca_x = cylinder1.b_x - cylinder1.a_x;
-			float ca_y = cylinder1.b_y - cylinder1.a_y;
-			float ca_z = cylinder1.b_z - cylinder1.a_z;
-
-			float oc_x = ray_ox - cylinder1.a_x;
-			float oc_y = ray_oy - cylinder1.a_y;
-			float oc_z = ray_oz - cylinder1.a_z;
-
-			float caca =
-			(
-				ca_x * ca_x +
-				ca_y * ca_y +
-				ca_z * ca_z
-			);
-
-			float card =
-			(
-				ca_x * ray_dx +
-				ca_y * ray_dy +
-				ca_z * ray_dz
-			);
-
-			float caoc =
-			(
-				ca_x * oc_x +
-				ca_y * oc_y +
-				ca_z * oc_z
-			);
-
-			float a = caca - card * card;
-
-			float ocrd =
-			(
-				oc_x * ray_dx +
-				oc_y * ray_dy +
-				oc_z * ray_dz
-			);
-
-			float b = caca * ocrd - caoc * card;
-
-			float ococ =
-			(
-				oc_x * oc_x +
-				oc_y * oc_y +
-				oc_z * oc_z
-			);
-
-			float c =
-			(
-				caca * ococ -
-				caoc * caoc -
-
-				cylinder1.radius *
-				cylinder1.radius
-
-				* caca
-			);
-    
-			float h = b * b - a * c;
-
-			if (h < 0.0f)
-			{
-				continue;
-			}
-
-			h = sqrtf(h);
-
-			float t = (-b - h) / a;
-
-			float y = caoc + t * card;
-
-			if (y > 0.0f && y < caca)
-			{
-				if (t < 0.0f)
-				{
-					continue;
-				}
-
-				if (t < min_dist)
-				{
-					min_dist = t;
-
-					set_ptr(hit_shape_material1, cylinder1.material1);
-					set_ptr(hit_shape_material2, cylinder1.material2);
-					set_ptr(hit_shape_material3, cylinder1.material3);
-					set_ptr(hit_shape_material4, cylinder1.material4);
-					set_ptr(hit_shape_material5, cylinder1.material5);
-
-					set_ptr(hit_shape_r, cylinder1.r);
-					set_ptr(hit_shape_g, cylinder1.g);
-					set_ptr(hit_shape_b, cylinder1.b);
-
-					set_ptr(hit_shape, shape1);
-
-					// Surface normal.
-
-					set_ptr(norm_x, (oc_x + t * ray_dx - ca_x * y / caca) / cylinder1.radius);
-					set_ptr(norm_y, (oc_y + t * ray_dy - ca_y * y / caca) / cylinder1.radius);
-					set_ptr(norm_z, (oc_z + t * ray_dz - ca_z * y / caca) / cylinder1.radius);
-				}
-			}
-
-			if (y < 0.0f)
-			{
-				t = -caoc / card;
-			}
-			else
-			{
-				t = (caca - caoc) / card;
-			}
-
-			if (fabsf(b + a * t) < h)
-			{
-				if (t < 0.0f)
-				{
-					continue;
-				}
-
-				if (t < min_dist)
-				{
-					min_dist = t;
-
-					set_ptr(hit_shape_material1, cylinder1.material1);
-					set_ptr(hit_shape_material2, cylinder1.material2);
-					set_ptr(hit_shape_material3, cylinder1.material3);
-					set_ptr(hit_shape_material4, cylinder1.material4);
-					set_ptr(hit_shape_material5, cylinder1.material5);
-
-					set_ptr(hit_shape_r, cylinder1.r);
-					set_ptr(hit_shape_g, cylinder1.g);
-					set_ptr(hit_shape_b, cylinder1.b);
-
-					set_ptr(hit_shape, shape1);
-
-					// Surface normal.
-
-					set_ptr(norm_x, ca_x * sign(y) / caca);
-					set_ptr(norm_y, ca_y * sign(y) / caca);
-					set_ptr(norm_z, ca_z * sign(y) / caca);
-				}
-			}
-		}
-		else if (shape1->primitive == shape_type::st_triangle)
-		{
-			triangle triangle1 = TO_TRIANGLE(shape1);
-
-			#define v0_x (triangle1.x0)
-			#define v0_y (triangle1.y0)
-			#define v0_z (triangle1.z0)
-
-			#define v1_x (triangle1.x1)
-			#define v1_y (triangle1.y1)
-			#define v1_z (triangle1.z1)
-
-			#define v2_x (triangle1.x2)
-			#define v2_y (triangle1.y2)
-			#define v2_z (triangle1.z2)
-
-			float v0v1_x = v1_x - v0_x;
-			float v0v1_y = v1_y - v0_y;
-			float v0v1_z = v1_z - v0_z;
-
-			float v0v2_x = v2_x - v0_x;
-			float v0v2_y = v2_y - v0_y;
-			float v0v2_z = v2_z - v0_z;
-
-			float pvec_x = ray_dy * v0v2_z - ray_dz * v0v2_y;
-			float pvec_y = ray_dz * v0v2_x - ray_dx * v0v2_z;
-			float pvec_z = ray_dx * v0v2_y - ray_dy * v0v2_x;
-
-			float inv_det = 1.0f /
-			(
-				v0v1_x * pvec_x +
-				v0v1_y * pvec_y +
-				v0v1_z * pvec_z
-			);
-
-			float tvec_x = ray_ox - v0_x;
-			float tvec_y = ray_oy - v0_y;
-			float tvec_z = ray_oz - v0_z;
-
-			float u = inv_det *
-			(
-				tvec_x * pvec_x +
-				tvec_y * pvec_y +
-				tvec_z * pvec_z
-			);
-
-			if (u < 0.0f || u > 1.0f)
-			{
-				continue;
-			}
-
-			float qvec_x = tvec_y * v0v1_z - tvec_z * v0v1_y;
-			float qvec_y = tvec_z * v0v1_x - tvec_x * v0v1_z;
-			float qvec_z = tvec_x * v0v1_y - tvec_y * v0v1_x;
-
-			float v = inv_det *
-			(
-				ray_dx * qvec_x +
-				ray_dy * qvec_y +
-				ray_dz * qvec_z
-			);
-
-			if (v < 0.0f || u + v > 1.0f)
-			{
-				continue;
-			}
-
-			float t = inv_det *
-			(
-				v0v2_x * qvec_x +
-				v0v2_y * qvec_y +
-				v0v2_z * qvec_z
-			);
-
-			if (t < 0.0f)
-			{
-				continue;
-			}
-
-			if (t < min_dist)
-			{
-				min_dist = t;
-
-				set_ptr(hit_shape_material1, triangle1.material1);
-				set_ptr(hit_shape_material2, triangle1.material2);
-				set_ptr(hit_shape_material3, triangle1.material3);
-				set_ptr(hit_shape_material4, triangle1.material4);
-				set_ptr(hit_shape_material5, triangle1.material5);
-
-				set_ptr(hit_shape_r, triangle1.r);
-				set_ptr(hit_shape_g, triangle1.g);
-				set_ptr(hit_shape_b, triangle1.b);
-
-				set_ptr(hit_shape, shape1);
-
-				// Surface normal.
-
-				set_ptr(norm_x, triangle1.norm_x);
-				set_ptr(norm_y, triangle1.norm_y);
-				set_ptr(norm_z, triangle1.norm_z);
-
-				// Texture coordinates.
-
-				set_ptr(texture_u, u);
-				set_ptr(texture_v, v);
-			}
+			set_ptr(texture_u, temporary_texture_u);
+			set_ptr(texture_v, temporary_texture_v);
 		}
 	}
 
