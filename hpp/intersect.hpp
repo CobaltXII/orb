@@ -45,7 +45,10 @@ float do_intersect
 
 			norm_x,
 			norm_y,
-			norm_z
+			norm_z,
+
+			texture_u,
+			texture_v
 		);
 	}
 	else if (shape1->primitive == shape_type::st_ellipsoid)

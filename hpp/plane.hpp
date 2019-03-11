@@ -142,7 +142,10 @@ inline float plane_intersect
 
 	float* norm_x,
 	float* norm_y,
-	float* norm_z
+	float* norm_z,
+
+	float* texture_u,
+	float* texture_v
 )
 {
 	float denom =
@@ -165,11 +168,37 @@ inline float plane_intersect
 			v_z * -plane1.norm_z
 		);
 
+		float t = distance / denom;
+
 		set_ptr(norm_x, plane1.norm_x);
 		set_ptr(norm_y, plane1.norm_y);
 		set_ptr(norm_z, plane1.norm_z);
 
-		return distance / denom;
+		float temp_texture_u;
+		float temp_texture_v;
+
+		plane_uv
+		(
+			ray_ox + ray_dx * t,
+			ray_oy + ray_dy * t,
+			ray_oz + ray_dz * t,
+
+			plane1.x,
+			plane1.y,
+			plane1.z,
+
+			plane1.norm_x,
+			plane1.norm_y,
+			plane1.norm_z,
+
+			temp_texture_u,
+			temp_texture_v
+		);
+
+		set_ptr(texture_u, temp_texture_u);
+		set_ptr(texture_v, temp_texture_v);
+
+		return t;
 	}
 
 	return -1.0f;
