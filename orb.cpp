@@ -49,6 +49,7 @@ struct shape
 	float material2;
 	float material3;
 	float material4;
+	float material5;
 
 	float r;
 	float g;
@@ -80,7 +81,8 @@ struct sphere: shape
 		float material1 = 0.0f,
 		float material2 = 0.0f,
 		float material3 = 0.0f,
-		float material4 = 0.0f
+		float material4 = 0.0f,
+		float material5 = 0.0f
 	)
 	{
 		this->primitive = shape_type::st_sphere;
@@ -99,6 +101,7 @@ struct sphere: shape
 		this->material2 = material2;
 		this->material3 = material3;
 		this->material4 = material4;
+		this->material5 = material5;
 	}
 };
 
@@ -134,7 +137,8 @@ struct ellipsoid: shape
 		float material1 = 0.0f,
 		float material2 = 0.0f,
 		float material3 = 0.0f,
-		float material4 = 0.0f
+		float material4 = 0.0f,
+		float material5 = 0.0f
 	)
 	{
 		this->primitive = shape_type::st_ellipsoid;
@@ -155,6 +159,7 @@ struct ellipsoid: shape
 		this->material2 = material2;
 		this->material3 = material3;
 		this->material4 = material4;
+		this->material5 = material5;
 	}
 };
 
@@ -196,7 +201,8 @@ struct cone: shape
 		float material1 = 0.0f,
 		float material2 = 0.0f,
 		float material3 = 0.0f,
-		float material4 = 0.0f
+		float material4 = 0.0f,
+		float material5 = 0.0f
 	)
 	{
 		this->primitive = shape_type::st_cone;
@@ -220,6 +226,7 @@ struct cone: shape
 		this->material2 = material2;
 		this->material3 = material3;
 		this->material4 = material4;
+		this->material5 = material5;
 	}
 };
 
@@ -259,7 +266,8 @@ struct capsule: shape
 		float material1 = 0.0f,
 		float material2 = 0.0f,
 		float material3 = 0.0f,
-		float material4 = 0.0f
+		float material4 = 0.0f,
+		float material5 = 0.0f
 	)
 	{
 		this->primitive = shape_type::st_capsule;
@@ -282,6 +290,7 @@ struct capsule: shape
 		this->material2 = material2;
 		this->material3 = material3;
 		this->material4 = material4;
+		this->material5 = material5;
 	}
 };
 
@@ -321,7 +330,8 @@ struct cylinder: shape
 		float material1 = 0.0f,
 		float material2 = 0.0f,
 		float material3 = 0.0f,
-		float material4 = 0.0f
+		float material4 = 0.0f,
+		float material5 = 0.0f
 	)
 	{
 		this->primitive = shape_type::st_cylinder;
@@ -344,6 +354,7 @@ struct cylinder: shape
 		this->material2 = material2;
 		this->material3 = material3;
 		this->material4 = material4;
+		this->material5 = material5;
 	}
 };
 
@@ -391,7 +402,8 @@ struct triangle: shape
 		float material1 = 0.0f,
 		float material2 = 0.0f,
 		float material3 = 0.0f,
-		float material4 = 0.0f
+		float material4 = 0.0f,
+		float material5 = 0.0f
 	)
 	{
 		this->primitive = shape_type::st_triangle;
@@ -416,6 +428,7 @@ struct triangle: shape
 		this->material2 = material2;
 		this->material3 = material3;
 		this->material4 = material4;
+		this->material5 = material5;
 
 		// Surface normal.
 
@@ -476,7 +489,8 @@ struct plane: shape
 		float material1 = 0.0f,
 		float material2 = 0.0f,
 		float material3 = 0.0f,
-		float material4 = 0.0f
+		float material4 = 0.0f,
+		float material5 = 0.0f
 	)
 	{
 		this->primitive = shape_type::st_plane;
@@ -508,6 +522,7 @@ struct plane: shape
 		this->material2 = material2;
 		this->material3 = material3;
 		this->material4 = material4;
+		this->material5 = material5;
 	}
 };
 
@@ -796,6 +811,7 @@ float cast
 	float* hit_shape_material2 = NULL,
 	float* hit_shape_material3 = NULL,
 	float* hit_shape_material4 = NULL,
+	float* hit_shape_material5 = NULL,
 
 	float* hit_shape_r = NULL,
 	float* hit_shape_g = NULL,
@@ -887,6 +903,7 @@ float cast
 				set_ptr(hit_shape_material2, sphere1.material2);
 				set_ptr(hit_shape_material3, sphere1.material3);
 				set_ptr(hit_shape_material4, sphere1.material4);
+				set_ptr(hit_shape_material5, sphere1.material5);
 
 				set_ptr(hit_shape_r, sphere1.r);
 				set_ptr(hit_shape_g, sphere1.g);
@@ -937,6 +954,7 @@ float cast
 						set_ptr(hit_shape_material2, plane1.material2);
 						set_ptr(hit_shape_material3, plane1.material3);
 						set_ptr(hit_shape_material4, plane1.material4);
+						set_ptr(hit_shape_material5, plane1.material5);
 
 						set_ptr(hit_shape_r, plane1.r);
 						set_ptr(hit_shape_g, plane1.g);
@@ -1043,6 +1061,7 @@ float cast
 				set_ptr(hit_shape_material2, ellipsoid1.material2);
 				set_ptr(hit_shape_material3, ellipsoid1.material3);
 				set_ptr(hit_shape_material4, ellipsoid1.material4);
+				set_ptr(hit_shape_material5, ellipsoid1.material5);
 
 				set_ptr(hit_shape_r, ellipsoid1.r);
 				set_ptr(hit_shape_g, ellipsoid1.g);
@@ -1126,6 +1145,7 @@ float cast
 						set_ptr(hit_shape_material2, cone1.material2);
 						set_ptr(hit_shape_material3, cone1.material3);
 						set_ptr(hit_shape_material4, cone1.material4);
+						set_ptr(hit_shape_material5, cone1.material5);
 
 						set_ptr(hit_shape_r, cone1.r);
 						set_ptr(hit_shape_g, cone1.g);
@@ -1168,6 +1188,7 @@ float cast
 						set_ptr(hit_shape_material2, cone1.material2);
 						set_ptr(hit_shape_material3, cone1.material3);
 						set_ptr(hit_shape_material4, cone1.material4);
+						set_ptr(hit_shape_material5, cone1.material5);
 
 						set_ptr(hit_shape_r, cone1.r);
 						set_ptr(hit_shape_g, cone1.g);
@@ -1246,6 +1267,7 @@ float cast
 					set_ptr(hit_shape_material2, cone1.material2);
 					set_ptr(hit_shape_material3, cone1.material3);
 					set_ptr(hit_shape_material4, cone1.material4);
+					set_ptr(hit_shape_material5, cone1.material5);
 
 					set_ptr(hit_shape_r, cone1.r);
 					set_ptr(hit_shape_g, cone1.g);
@@ -1348,6 +1370,7 @@ float cast
 						set_ptr(hit_shape_material2, capsule1.material2);
 						set_ptr(hit_shape_material3, capsule1.material3);
 						set_ptr(hit_shape_material4, capsule1.material4);
+						set_ptr(hit_shape_material5, capsule1.material5);
 
 						set_ptr(hit_shape_r, capsule1.r);
 						set_ptr(hit_shape_g, capsule1.g);
@@ -1432,6 +1455,7 @@ float cast
 						set_ptr(hit_shape_material2, capsule1.material2);
 						set_ptr(hit_shape_material3, capsule1.material3);
 						set_ptr(hit_shape_material4, capsule1.material4);
+						set_ptr(hit_shape_material5, capsule1.material5);
 
 						set_ptr(hit_shape_r, capsule1.r);
 						set_ptr(hit_shape_g, capsule1.g);
@@ -1555,6 +1579,7 @@ float cast
 					set_ptr(hit_shape_material2, cylinder1.material2);
 					set_ptr(hit_shape_material3, cylinder1.material3);
 					set_ptr(hit_shape_material4, cylinder1.material4);
+					set_ptr(hit_shape_material5, cylinder1.material5);
 
 					set_ptr(hit_shape_r, cylinder1.r);
 					set_ptr(hit_shape_g, cylinder1.g);
@@ -1594,6 +1619,7 @@ float cast
 					set_ptr(hit_shape_material2, cylinder1.material2);
 					set_ptr(hit_shape_material3, cylinder1.material3);
 					set_ptr(hit_shape_material4, cylinder1.material4);
+					set_ptr(hit_shape_material5, cylinder1.material5);
 
 					set_ptr(hit_shape_r, cylinder1.r);
 					set_ptr(hit_shape_g, cylinder1.g);
@@ -1696,6 +1722,7 @@ float cast
 				set_ptr(hit_shape_material2, triangle1.material2);
 				set_ptr(hit_shape_material3, triangle1.material3);
 				set_ptr(hit_shape_material4, triangle1.material4);
+				set_ptr(hit_shape_material5, triangle1.material5);
 
 				set_ptr(hit_shape_r, triangle1.r);
 				set_ptr(hit_shape_g, triangle1.g);
@@ -1808,6 +1835,7 @@ void trace
 	float hit_shape_material2;
 	float hit_shape_material3;
 	float hit_shape_material4;
+	float hit_shape_material5;
 
 	float hit_shape_r;
 	float hit_shape_g;
@@ -1836,6 +1864,7 @@ void trace
 		&hit_shape_material2,
 		&hit_shape_material3,
 		&hit_shape_material4,
+		&hit_shape_material5,
 
 		&hit_shape_r,
 		&hit_shape_g,
@@ -2062,7 +2091,7 @@ void trace
 
 		// Specular.
 
-		float specular_constant = 0.5f;
+		float specular_constant = hit_shape_material5;
 
 		float view_hit_x = ray_ox - hit_x;
 		float view_hit_y = ray_oy - hit_y;
@@ -2097,7 +2126,7 @@ void trace
 			view_hit_z * specular_z
 		);
 
-		float specular_coefficient = powf(fmax(dot_view_specular, 0.0f), hit_shape_material4);
+		float specular_coefficient = powf(fmax(dot_view_specular, 0.0f), hit_shape_material4) / dr / dr;
 
 		out_r += fmax(0.0f, light1.r * specular_coefficient * specular_constant * shadow);
 		out_g += fmax(0.0f, light1.g * specular_coefficient * specular_constant * shadow);
@@ -2383,7 +2412,7 @@ int main(int argc, char** argv)
 							0.000f,
 							0.000f,
 
-							0.0f, 0.0f, 0.0f, INFINITY
+							0.0f, 0.0f, 0.0f, 1.0f, 0.0f
 						)
 					);
 				}
@@ -2430,7 +2459,8 @@ int main(int argc, char** argv)
 						inif(section.first, "material1"),
 						inif(section.first, "material2"),
 						inif(section.first, "material3"),
-						inif(section.first, "material4")
+						inif(section.first, "material4"),
+						inif(section.first, "material5")
 					)
 				);
 			}
@@ -2455,7 +2485,8 @@ int main(int argc, char** argv)
 						inif(section.first, "material1"),
 						inif(section.first, "material2"),
 						inif(section.first, "material3"),
-						inif(section.first, "material4")
+						inif(section.first, "material4"),
+						inif(section.first, "material5")
 					)
 				);
 			}
@@ -2483,7 +2514,8 @@ int main(int argc, char** argv)
 						inif(section.first, "material1"),
 						inif(section.first, "material2"),
 						inif(section.first, "material3"),
-						inif(section.first, "material4")
+						inif(section.first, "material4"),
+						inif(section.first, "material5")
 					)
 				);
 			}
@@ -2510,7 +2542,8 @@ int main(int argc, char** argv)
 						inif(section.first, "material1"),
 						inif(section.first, "material2"),
 						inif(section.first, "material3"),
-						inif(section.first, "material4")
+						inif(section.first, "material4"),
+						inif(section.first, "material5")
 					)
 				);
 			}
@@ -2537,7 +2570,8 @@ int main(int argc, char** argv)
 						inif(section.first, "material1"),
 						inif(section.first, "material2"),
 						inif(section.first, "material3"),
-						inif(section.first, "material4")
+						inif(section.first, "material4"),
+						inif(section.first, "material5")
 					)
 				);
 			}
@@ -2562,7 +2596,8 @@ int main(int argc, char** argv)
 						inif(section.first, "material1"),
 						inif(section.first, "material2"),
 						inif(section.first, "material3"),
-						inif(section.first, "material4")
+						inif(section.first, "material4"),
+						inif(section.first, "material5")
 					)
 				);
 			}
@@ -2591,7 +2626,8 @@ int main(int argc, char** argv)
 						inif(section.first, "material1"),
 						inif(section.first, "material2"),
 						inif(section.first, "material3"),
-						inif(section.first, "material4")
+						inif(section.first, "material4"),
+						inif(section.first, "material5")
 					)
 				);
 			}
