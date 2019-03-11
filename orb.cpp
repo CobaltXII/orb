@@ -805,6 +805,9 @@ float cast
 	float* norm_y = NULL,
 	float* norm_z = NULL,
 
+	float* texture_u = NULL,
+	float* texture_v = NULL,
+
 	shape** hit_shape = NULL
 )
 {
@@ -1705,6 +1708,11 @@ float cast
 				set_ptr(norm_x, triangle1.norm_x);
 				set_ptr(norm_y, triangle1.norm_y);
 				set_ptr(norm_z, triangle1.norm_z);
+
+				// Texture coordinates.
+
+				set_ptr(texture_u, u);
+				set_ptr(texture_v, v);
 			}
 		}
 	}
@@ -1809,6 +1817,9 @@ void trace
 	float norm_y;
 	float norm_z;
 
+	float texture_u;
+	float texture_v;
+
 	shape* hit_shape;
 
 	float min_dist = cast
@@ -1833,6 +1844,9 @@ void trace
 		&norm_x,
 		&norm_y,
 		&norm_z,
+
+		&texture_u,
+		&texture_v,
 
 		&hit_shape
 	);
@@ -1932,9 +1946,6 @@ void trace
 
 	if (hit_shape->primitive == shape_type::st_plane)
 	{
-		float plane_u;
-		float plane_v;
-
 		plane_uv
 		(
 			hit_x,
@@ -1949,8 +1960,8 @@ void trace
 			norm_y,
 			norm_z,
 
-			plane_u,
-			plane_v
+			texture_u,
+			texture_v
 		);
 
 		float domain_u = 10.0f;
@@ -1958,8 +1969,8 @@ void trace
 
 		float expand = 16384.0f;
 
-		int check_u = fmod(plane_u + domain_u * expand, domain_u * 2.0f) >= domain_u;
-		int check_v = fmod(plane_v + domain_v * expand, domain_v * 2.0f) >= domain_v;
+		int check_u = fmod(texture_u + domain_u * expand, domain_u * 2.0f) >= domain_u;
+		int check_v = fmod(texture_v + domain_v * expand, domain_v * 2.0f) >= domain_v;
 
 		if (check_u ^ check_v)
 		{
@@ -2304,6 +2315,84 @@ int ini_parser(void* user, const char* section, const char* name, const char* va
 
 int main(int argc, char** argv)
 {
+	if (false)
+	{
+		// Testing tinyobjloader!
+
+		tinyobj::attrib_t obj_attrib;
+
+		std::vector<tinyobj::shape_t> obj_shapes;
+
+		std::vector<tinyobj::material_t> obj_materials;
+
+		std::string obj_warning;
+
+		std::string obj_error;
+
+		if (!tinyobj::LoadObj(&obj_attrib, &obj_shapes, &obj_materials, &obj_warning, &obj_error, "teapot.obj"))
+		{
+			if (!obj_error.empty())
+			{
+				std::cout << obj_error << std::endl;
+			}
+
+			return EXIT_FAILURE;
+		}
+
+		if (!obj_warning.empty())
+		{
+			std::cout << obj_warning << std::endl;
+		}
+
+		for (size_t s = 0; s < obj_shapes.size(); s++)
+		{
+			size_t index_offset = 0;
+
+			for (size_t f = 0; f < obj_shapes[s].mesh.num_face_vertices.size(); f++)
+			{
+				int fv = obj_shapes[s].mesh.num_face_vertices[f];
+
+				if (fv == 3)
+				{
+					// Only triangle support.
+
+					tinyobj::real_t avx[3];
+					tinyobj::real_t avy[3];
+					tinyobj::real_t avz[3];
+
+					for (size_t v = 0; v < fv; v++)
+					{
+						tinyobj::index_t idx = obj_shapes[s].mesh.indices[index_offset + v];
+
+						avx[v] = obj_attrib.vertices[3 * idx.vertex_index + 0];
+						avy[v] = obj_attrib.vertices[3 * idx.vertex_index + 1];
+						avz[v] = obj_attrib.vertices[3 * idx.vertex_index + 2];	
+					}
+
+					float yoff = -1.5f;
+
+					shapes.push_back
+					(
+						new triangle
+						(
+							avx[0], avy[0] + yoff, avz[0],
+							avx[1], avy[1] + yoff, avz[1],
+							avx[2], avy[2] + yoff, avz[2],
+
+							0.200f,
+							0.000f,
+							0.000f,
+
+							0.0f, 0.0f, 0.0f, INFINITY
+						)
+					);
+				}
+
+				index_offset += fv;
+	    	}
+		}
+	}
+
 	if (argc != 2)
 	{
 		std::cout << "Usage: " << argv[0] << " <scene>" << std::endl;
