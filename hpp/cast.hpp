@@ -99,6 +99,33 @@ float shadow_ray
 	float light_radius
 )
 {
+	#ifdef RAYMARCHED_SHADOWS
+
+	float res = 1.0f;
+
+	for (float t = 0.0f; t < fmin(light_distance, 1e+4f); t += 0.0f)
+	{
+		float h = signed_distance_field
+		(
+			ray_ox + t * ray_dx,
+			ray_oy + t * ray_dy,
+			ray_oz + t * ray_dz
+		);
+
+		if (h < 1e-2f)
+		{
+			return 0.025f;
+		}
+
+		res = fmin(res, (128.0f / light_radius) * h / t);
+
+		t += h;
+	}
+
+	return fmax(0.025f, res);
+
+	#else
+
 	float dist = cast
 	(
 		ray_ox,
@@ -118,4 +145,6 @@ float shadow_ray
 	{
 		return 1.0f;
 	}
+
+	#endif
 }
