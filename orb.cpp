@@ -57,6 +57,8 @@ void nuke(std::string note)
 
 #include "hpp/shape.hpp"
 
+#include "hpp/intersection.hpp"
+
 #include "hpp/ellipsoid.hpp"
 #include "hpp/cylinder.hpp"
 #include "hpp/triangle.hpp"
