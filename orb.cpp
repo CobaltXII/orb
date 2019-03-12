@@ -507,6 +507,29 @@ void trace
 		out_b = out_b * (1.0f - hit_shape_material2) + refract_b * hit_shape_material2;
 	}
 
+	#ifdef EXPERIMENTAL_FOG
+
+	// Some sort of big foggy.
+
+	float frequency = 8.0f;
+
+	float noise = stb_perlin_ridge_noise3
+	(
+		ray_dx * frequency,
+		ray_dy * frequency,
+		ray_dz * frequency,
+
+		2.0f, 0.5f, 1.0f, 6
+	);
+
+	min_dist = sqrtf(min_dist) / 100.0f;
+
+	out_r += noise * min_dist;
+	out_g += noise * min_dist;
+	out_b += noise * min_dist;
+
+	#endif
+
 	#ifdef CLAMP_TRACE
 
 	out_r = fmax(0.0f, fmin(1.0f, out_r));
