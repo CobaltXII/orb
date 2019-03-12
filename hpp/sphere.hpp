@@ -52,31 +52,6 @@ inline sphere TO_SPHERE(shape* __victim)
 	return *((sphere*)__victim);
 }
 
-inline void sphere_uv
-(
-	float intersection_x,
-	float intersection_y,
-	float intersection_z,
-
-	float sphere_center_x,
-	float sphere_center_y,
-	float sphere_center_z,
-
-	float sphere_radius,
-
-	float& out_u,
-	float& out_v
-)
-{
-	float hit_vec_x = intersection_x - sphere_center_x;
-	float hit_vec_y = intersection_y - sphere_center_y;
-	float hit_vec_z = intersection_z - sphere_center_z;
-
-	out_u = (1.0f + atan2f(hit_vec_z, hit_vec_x) / M_PI) * 0.5f;
-
-	out_v = acosf(hit_vec_y / sphere_radius) / M_PI;
-}
-
 inline float sphere_intersect
 (
 	sphere sphere1,
