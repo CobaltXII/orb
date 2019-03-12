@@ -768,6 +768,110 @@ int main(int argc, char** argv)
 					)
 				);
 			}
+			else if (type == "model")
+			{
+				std::string path = inis(section.first, "path");
+
+				float scale_x = inif(section.first, "scale_x");
+				float scale_y = inif(section.first, "scale_y");
+				float scale_z = inif(section.first, "scale_z");
+
+				float off_x = inif(section.first, "off_x");
+				float off_y = inif(section.first, "off_y");
+				float off_z = inif(section.first, "off_z");
+
+				float r = inif(section.first, "r");
+				float g = inif(section.first, "g");
+				float b = inif(section.first, "b");
+
+				float material1 = inif(section.first, "material1");
+				float material2 = inif(section.first, "material2");
+				float material3 = inif(section.first, "material3");
+				float material4 = inif(section.first, "material4");
+				float material5 = inif(section.first, "material5");
+
+				tinyobj::attrib_t obj_attrib;
+
+				std::vector<tinyobj::shape_t> obj_shapes;
+
+				std::vector<tinyobj::material_t> obj_materials;
+
+				std::string obj_warning;
+
+				std::string obj_error;
+
+				if (!tinyobj::LoadObj(&obj_attrib, &obj_shapes, &obj_materials, &obj_warning, &obj_error, path.c_str()))
+				{
+					if (!obj_error.empty())
+					{
+						std::cout << obj_error << std::endl;
+					}
+
+					return EXIT_FAILURE;
+				}
+
+				if (!obj_warning.empty())
+				{
+					std::cout << obj_warning << std::endl;
+				}
+
+				for (size_t s = 0; s < obj_shapes.size(); s++)
+				{
+					size_t index_offset = 0;
+
+					for (size_t f = 0; f < obj_shapes[s].mesh.num_face_vertices.size(); f++)
+					{
+						int fv = obj_shapes[s].mesh.num_face_vertices[f];
+
+						if (fv == 3)
+						{
+							tinyobj::real_t avx[3];
+							tinyobj::real_t avy[3];
+							tinyobj::real_t avz[3];
+
+							for (size_t v = 0; v < fv; v++)
+							{
+								tinyobj::index_t idx = obj_shapes[s].mesh.indices[index_offset + v];
+
+								avx[v] = obj_attrib.vertices[3 * idx.vertex_index + 0];
+								avy[v] = obj_attrib.vertices[3 * idx.vertex_index + 1];
+								avz[v] = obj_attrib.vertices[3 * idx.vertex_index + 2];
+							}
+
+							for (int i = 0; i < 3; i++)
+							{
+								avx[i] *= scale_x;
+								avy[i] *= scale_y;
+								avz[i] *= scale_z;
+
+								avx[i] += off_x;
+								avy[i] += off_y;
+								avz[i] += off_z;
+							}
+
+							shapes.push_back
+							(
+								new triangle
+								(
+									avx[0], avy[0], avz[0],
+									avx[1], avy[1], avz[1],
+									avx[2], avy[2], avz[2],
+
+									r, g, b,
+
+									material1,
+									material2,
+									material3,
+									material4,
+									material5
+								)
+							);
+						}
+
+						index_offset += fv;
+			    	}
+				}
+			}
 			else
 			{
 				nuke("Unknown type name (main).");
