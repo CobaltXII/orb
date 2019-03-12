@@ -67,9 +67,10 @@ void nuke(std::string note)
 #include "hpp/plane.hpp"
 #include "hpp/cone.hpp"
 
-#include "hpp/intersect.hpp"
-
 std::vector<shape*> shapes;
+
+#include "hpp/estimator.hpp"
+#include "hpp/intersect.hpp"
 
 #include "hpp/light.hpp"
 
