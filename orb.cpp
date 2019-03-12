@@ -92,8 +92,6 @@ void trace
 	int depth = 0
 )
 {
-	// Cast primary ray.
-
 	float hit_shape_material1;
 	float hit_shape_material2;
 	float hit_shape_material3;
