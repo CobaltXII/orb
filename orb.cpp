@@ -65,366 +65,15 @@ void nuke(std::string note)
 #include "hpp/plane.hpp"
 #include "hpp/cone.hpp"
 
+#include "hpp/intersect.hpp"
+
 std::vector<shape*> shapes;
 
 #include "hpp/light.hpp"
 
 std::vector<light> lights;
 
-float signed_distance_field
-(
-	float x,
-	float y,
-	float z
-)
-{
-	float distance = std::numeric_limits<float>::max();
-
-	for (int i = 0; i < shapes.size(); i++)
-	{
-		shape* shape1 = shapes[i];
-
-		// Use the appropriate signed distance function.
-
-		if (shape1->primitive == shape_type::st_sphere)
-		{
-			sphere sphere1 = TO_SPHERE(shape1);
-
-			float p_x = x - sphere1.x;
-			float p_y = y - sphere1.y;
-			float p_z = z - sphere1.z;
-
-			float p_length = sqrtf
-			(
-				p_x * p_x +
-				p_y * p_y +
-				p_z * p_z
-			);
-
-			distance = fmin(p_length - sphere1.radius, distance);
-		}
-		else if (shape1->primitive == shape_type::st_plane)
-		{
-			plane plane1 = TO_PLANE(shape1);
-		}
-		else if (shape1->primitive == shape_type::st_ellipsoid)
-		{
-			ellipsoid ellipsoid1 = TO_ELLIPSOID(shape1);
-
-			float k0_x = (x - ellipsoid1.x) / ellipsoid1.radius_x;
-			float k0_y = (y - ellipsoid1.y) / ellipsoid1.radius_y;
-			float k0_z = (z - ellipsoid1.z) / ellipsoid1.radius_z;
-
-			float k1_x = (x - ellipsoid1.x) / (ellipsoid1.radius_x * ellipsoid1.radius_x);
-			float k1_y = (y - ellipsoid1.y) / (ellipsoid1.radius_y * ellipsoid1.radius_y);
-			float k1_z = (z - ellipsoid1.z) / (ellipsoid1.radius_z * ellipsoid1.radius_z);
-
-			float k0 = sqrtf
-			(
-				k0_x * k0_x +
-				k0_y * k0_y +
-				k0_z * k0_z
-			);
-
-			float k1 = sqrtf
-			(
-				k1_x * k1_x +
-				k1_y * k1_y +
-				k1_z * k1_z
-			);
-
-			distance = fmin(k0 * (k0 - 1.0f) / k1, distance);
-		}
-		else if (shape1->primitive == shape_type::st_cone)
-		{
-			cone cone1 = TO_CONE(shape1);
-		}
-		else if (shape1->primitive == shape_type::st_capsule)
-		{
-			capsule capsule1 = TO_CAPSULE(shape1);
-		}
-		else if (shape1->primitive == shape_type::st_cylinder)
-		{
-			cylinder cylinder1 = TO_CYLINDER(shape1);
-		}
-	}
-
-	return distance;
-}
-
-float do_intersect
-(
-	float ray_ox,
-	float ray_oy,
-	float ray_oz,
-
-	float ray_dx,
-	float ray_dy,
-	float ray_dz,
-
-	float* norm_x,
-	float* norm_y,
-	float* norm_z,
-
-	float* texture_u,
-	float* texture_v,
-
-	shape* shape1
-)
-{
-	if (shape1->primitive == shape_type::st_sphere)
-	{
-		return sphere_intersect
-		(
-			TO_SPHERE(shape1),
-
-			ray_ox, ray_oy, ray_oz,
-			ray_dx, ray_dy, ray_dz,
-
-			norm_x,
-			norm_y,
-			norm_z
-		);
-	}
-	else if (shape1->primitive == shape_type::st_plane)
-	{
-		return plane_intersect
-		(
-			TO_PLANE(shape1),
-
-			ray_ox, ray_oy, ray_oz,
-			ray_dx, ray_dy, ray_dz,
-
-			norm_x,
-			norm_y,
-			norm_z
-		);
-	}
-	else if (shape1->primitive == shape_type::st_ellipsoid)
-	{
-		return ellipsoid_intersect
-		(
-			TO_ELLIPSOID(shape1),
-
-			ray_ox, ray_oy, ray_oz,
-			ray_dx, ray_dy, ray_dz,
-
-			norm_x,
-			norm_y,
-			norm_z
-		);
-	}
-	else if (shape1->primitive == shape_type::st_cone)
-	{
-		return cone_intersect
-		(
-			TO_CONE(shape1),
-
-			ray_ox, ray_oy, ray_oz,
-			ray_dx, ray_dy, ray_dz,
-
-			norm_x,
-			norm_y,
-			norm_z
-		);
-	}
-	else if (shape1->primitive == shape_type::st_capsule)
-	{
-		return capsule_intersect
-		(
-			TO_CAPSULE(shape1),
-
-			ray_ox, ray_oy, ray_oz,
-			ray_dx, ray_dy, ray_dz,
-
-			norm_x,
-			norm_y,
-			norm_z
-		);
-	}
-	else if (shape1->primitive == shape_type::st_cylinder)
-	{
-		return cylinder_intersect
-		(
-			TO_CYLINDER(shape1),
-
-			ray_ox, ray_oy, ray_oz,
-			ray_dx, ray_dy, ray_dz,
-
-			norm_x,
-			norm_y,
-			norm_z
-		);
-	}
-	else if (shape1->primitive == shape_type::st_triangle)
-	{
-		return triangle_intersect
-		(
-			TO_TRIANGLE(shape1),
-
-			ray_ox, ray_oy, ray_oz,
-			ray_dx, ray_dy, ray_dz,
-
-			norm_x,
-			norm_y,
-			norm_z,
-
-			texture_u,
-			texture_v
-		);
-	}
-}
-
-float cast
-(
-	float ray_ox,
-	float ray_oy,
-	float ray_oz,
-
-	float ray_dx,
-	float ray_dy,
-	float ray_dz,
-
-	float* hit_shape_material1 = NULL,
-	float* hit_shape_material2 = NULL,
-	float* hit_shape_material3 = NULL,
-	float* hit_shape_material4 = NULL,
-	float* hit_shape_material5 = NULL,
-
-	float* hit_shape_r = NULL,
-	float* hit_shape_g = NULL,
-	float* hit_shape_b = NULL,
-
-	float* norm_x = NULL,
-	float* norm_y = NULL,
-	float* norm_z = NULL,
-
-	float* texture_u = NULL,
-	float* texture_v = NULL,
-
-	shape** hit_shape = NULL
-)
-{
-	float temporary_norm_x;
-	float temporary_norm_y;
-	float temporary_norm_z;
-
-	float temporary_texture_u;
-	float temporary_texture_v;
-
-	float min_dist = std::numeric_limits<float>::max();
-
-	for (int i = 0; i < shapes.size(); i++)
-	{
-		shape* shape1 = shapes[i];
-
-		float t = do_intersect
-		(
-			ray_ox, ray_oy, ray_oz,
-			ray_dx, ray_dy, ray_dz,
-
-			&temporary_norm_x,
-			&temporary_norm_y,
-			&temporary_norm_z,
-
-			&temporary_texture_u,
-			&temporary_texture_v,
-
-			shape1			
-		);
-
-		if (t > 0.0f && t < min_dist)
-		{
-			min_dist = t;
-
-			set_ptr(hit_shape_material1, shape1->material1);
-			set_ptr(hit_shape_material2, shape1->material2);
-			set_ptr(hit_shape_material3, shape1->material3);
-			set_ptr(hit_shape_material4, shape1->material4);
-			set_ptr(hit_shape_material5, shape1->material5);
-
-			set_ptr(hit_shape_r, shape1->r);
-			set_ptr(hit_shape_g, shape1->g);
-			set_ptr(hit_shape_b, shape1->b);
-
-			set_ptr(hit_shape, shape1);
-
-			set_ptr(norm_x, temporary_norm_x);
-			set_ptr(norm_y, temporary_norm_y);
-			set_ptr(norm_z, temporary_norm_z);
-
-			set_ptr(texture_u, temporary_texture_u);
-			set_ptr(texture_v, temporary_texture_v);
-		}
-	}
-
-	return min_dist;
-}
-
-float shadow_ray
-(
-	float light_distance,
-
-	float ray_ox,
-	float ray_oy,
-	float ray_oz,
-
-	float ray_dx,
-	float ray_dy,
-	float ray_dz,
-
-	float light_radius
-)
-{
-	#ifdef RAYMARCHED_SHADOWS
-
-	float res = 1.0f;
-
-	for (float t = 0.0f; t < light_distance; t += 0.0f)
-	{
-		float h = signed_distance_field
-		(
-			ray_ox + t * ray_dx,
-			ray_oy + t * ray_dy,
-			ray_oz + t * ray_dz
-		);
-
-		if (h < 1e-2f)
-		{
-			return 0.025f;
-		}
-
-		res = fmin(res, (128.0f / light_radius) * h / t);
-
-		t += h;
-	}
-
-	return fmax(0.025f, res);
-
-	#else
-
-	float dist = cast
-	(
-		ray_ox,
-		ray_oy,
-		ray_oz,
-
-		ray_dx,
-		ray_dy,
-		ray_dz
-	);
-
-	if (dist < light_distance)
-	{
-		return 0.025f;
-	}
-	else
-	{
-		return 1.0f;
-	}
-
-	#endif
-}
+#include "hpp/cast.hpp"
 
 void trace
 (
@@ -502,65 +151,18 @@ void trace
 	{
 		// Missed everything, use background shader.
 
-		int mode = 1;
+		float frequency = 8.0f;
 
-		if (mode == 0)
-		{
-			// Checkerboard.
+		float noise = stb_perlin_fbm_noise3
+		(
+			ray_dx * frequency, 
+			ray_dy * frequency, 
+			ray_dz * frequency, 
 
-			float ray_intersection_u;
-			float ray_intersection_v;
+			2.0f, 0.5f, 6
+		);
 
-			sphere_uv
-			(
-				ray_dx,
-				ray_dy,
-				ray_dz,
-
-				0.0f, 0.0f, 0.0f,
-
-				1.0f,
-
-				ray_intersection_u,
-				ray_intersection_v
-			);
-
-			float domain_u = 0.025f;
-			float domain_v = 0.025f;
-
-			bool check_u = fmod(ray_intersection_u + domain_u * 100.0f, domain_u * 2.0f) >= domain_u;
-			bool check_v = fmod(ray_intersection_v + domain_v * 100.0f, domain_v * 2.0f) >= domain_v;
-
-			if (check_u ^ check_v)
-			{
-				out_r = 0.0f;
-				out_g = 0.0f;
-				out_b = 0.0f;
-			}
-			else
-			{
-				out_r = 0.8f;
-				out_g = 0.8f;
-				out_b = 0.8f;
-			}
-		}
-		else if (mode == 1)
-		{
-			// Blood sky.
-
-			float frequency = 8.0f;
-
-			float noise = stb_perlin_fbm_noise3
-			(
-				ray_dx * frequency, 
-				ray_dy * frequency, 
-				ray_dz * frequency, 
-
-				2.0f, 0.5f, 6
-			);
-
-			out_r = fmax(0.0f, fmin(1.0f, (noise + 1.0f) / 2.0f * 0.032f));
-		}
+		out_r = fmax(0.0f, fmin(1.0f, (noise + 1.0f) / 2.0f * 0.032f));
 
 		return;
 	}
@@ -585,28 +187,11 @@ void trace
 	float hit_y = ray_oy + ray_dy * min_dist;
 	float hit_z = ray_oz + ray_dz * min_dist;
 
-	// Check for planes, which should be checkered.
+	// Check for planes, which should be checkered. Everything else gets a
+	// procedural noise texture.
 
 	if (hit_shape->primitive == shape_type::st_plane)
 	{
-		plane_uv
-		(
-			hit_x,
-			hit_y,
-			hit_z,
-
-			TO_PLANE(hit_shape).x,
-			TO_PLANE(hit_shape).y,
-			TO_PLANE(hit_shape).z,
-
-			norm_x,
-			norm_y,
-			norm_z,
-
-			texture_u,
-			texture_v
-		);
-
 		float domain_u = 10.0f;
 		float domain_v = 10.0f;
 
@@ -630,8 +215,6 @@ void trace
 	}
 	else
 	{
-		// Everything else gets a procedural texture.
-
 		float frequency = 0.48f;
 
 		float noise = stb_perlin_ridge_noise3
@@ -923,7 +506,7 @@ void trace
 		out_b = out_b * (1.0f - hit_shape_material2) + refract_b * hit_shape_material2;
 	}
 
-	#ifndef REALLY_BRIGHT_LIGHTS
+	#ifdef CLAMP_TRACE
 
 	out_r = fmax(0.0f, fmin(1.0f, out_r));
 	out_g = fmax(0.0f, fmin(1.0f, out_g));
@@ -958,84 +541,6 @@ int ini_parser(void* user, const char* section, const char* name, const char* va
 
 int main(int argc, char** argv)
 {
-	if (false)
-	{
-		// Testing tinyobjloader!
-
-		tinyobj::attrib_t obj_attrib;
-
-		std::vector<tinyobj::shape_t> obj_shapes;
-
-		std::vector<tinyobj::material_t> obj_materials;
-
-		std::string obj_warning;
-
-		std::string obj_error;
-
-		if (!tinyobj::LoadObj(&obj_attrib, &obj_shapes, &obj_materials, &obj_warning, &obj_error, "teapot.obj"))
-		{
-			if (!obj_error.empty())
-			{
-				std::cout << obj_error << std::endl;
-			}
-
-			return EXIT_FAILURE;
-		}
-
-		if (!obj_warning.empty())
-		{
-			std::cout << obj_warning << std::endl;
-		}
-
-		for (size_t s = 0; s < obj_shapes.size(); s++)
-		{
-			size_t index_offset = 0;
-
-			for (size_t f = 0; f < obj_shapes[s].mesh.num_face_vertices.size(); f++)
-			{
-				int fv = obj_shapes[s].mesh.num_face_vertices[f];
-
-				if (fv == 3)
-				{
-					// Only triangle support.
-
-					tinyobj::real_t avx[3];
-					tinyobj::real_t avy[3];
-					tinyobj::real_t avz[3];
-
-					for (size_t v = 0; v < fv; v++)
-					{
-						tinyobj::index_t idx = obj_shapes[s].mesh.indices[index_offset + v];
-
-						avx[v] = obj_attrib.vertices[3 * idx.vertex_index + 0];
-						avy[v] = obj_attrib.vertices[3 * idx.vertex_index + 1];
-						avz[v] = obj_attrib.vertices[3 * idx.vertex_index + 2];	
-					}
-
-					float yoff = -1.5f;
-
-					shapes.push_back
-					(
-						new triangle
-						(
-							avx[0], avy[0] + yoff, avz[0],
-							avx[1], avy[1] + yoff, avz[1],
-							avx[2], avy[2] + yoff, avz[2],
-
-							0.200f,
-							0.000f,
-							0.000f,
-
-							0.0f, 0.0f, 0.0f, 1.0f, 0.0f
-						)
-					);
-				}
-
-				index_offset += fv;
-	    	}
-		}
-	}
-
 	if (argc != 2)
 	{
 		std::cout << "Usage: " << argv[0] << " <scene>" << std::endl;
@@ -1359,8 +864,6 @@ int main(int argc, char** argv)
 
 			#ifdef GAMMA
 
-			// Gamma correction (slightly broken).
-			
 			pixel[R] = fmax(0.0f, fmin(255.0f, powf(color_r, gamma) * 255.0f));
 			pixel[G] = fmax(0.0f, fmin(255.0f, powf(color_g, gamma) * 255.0f));
 			pixel[B] = fmax(0.0f, fmin(255.0f, powf(color_b, gamma) * 255.0f));
